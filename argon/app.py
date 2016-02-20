@@ -8,6 +8,10 @@ import argsparse
 class App(Cmd):
 
     prompt = '# '
+    range_limit = 1000
+    launch_alt = 15
+    min_alt = 5
+    max_alt = 100
 
     def cmdloop(self):
         try:
@@ -21,11 +25,6 @@ class App(Cmd):
 
     def __init__(self, connect):
         Cmd.__init__(self)
-        # define flight params, in meters
-        self.range_limit = 1000
-        self.launch_alt = 15   # XXX paramaterize these
-        self.min_alt = 5
-        self.max_alt = 100
         # clear incoming console, print intro banner
         os.system('clear')
         print '# argon : dronekit-based custom flight control console\n'
@@ -53,6 +52,7 @@ class App(Cmd):
         print 'argon version 1.0'
         self.vehicle.wait_ready('autopilot_version')
         print 'vehicle firmware version {}'.format(self.vehicle.version)
+        print self.prompt
         print
 
     def do_exit(self, args):
@@ -66,7 +66,7 @@ class App(Cmd):
         with open('help.txt', 'r') as help:
             print help.read()
 
-    # vehicle overview
+    # vehicle state
 
     def do_status(self, args):
         ''' get system status from the vehicle '''
@@ -217,7 +217,7 @@ class App(Cmd):
         print
 
     def do_move(self, args):
-        ''' move to position via --head/--dist and/or --alt '''
+        ''' move to position via --heading/--distance and/or --altitude '''
         # check vehicle mode and status
         if self.vehicle.system_status.state != 'ACTIVE' \
                 and self.vehicle.mode.name != 'GUIDED':
@@ -225,9 +225,9 @@ class App(Cmd):
             return
         # parse arguments
         location = self.vehicle.location.global_relative_frame
-        heading = self._parse_heading_arg(args)
-        distance = self._parse_distance_arg(args)
-        alt = self._parse_alt_arg(args)
+        heading = argsparse.heading(args)
+        distance = argsparse.distance(args)
+        alt = argsparse.altitude(args)
         # verify altitude, or use current if not provided
         if alt is not None:
             if alt > self.max_alt:
@@ -283,39 +283,4 @@ class App(Cmd):
     def do_photo(self, args):
         ''' rotate vehicle to --head and take photo '''
         pass
-
-    # argument parsing helpers
-
-    def _parse_alt_arg(self, line):
-        ''' helper method to parse alt argument '''
-        altitude = None
-        try:
-            match = re.search(r'alt=(\d+)', line)
-            if match is not None:
-                altitude = float(match.group(1))
-        except:
-            pass
-        return altitude
-
-    def _parse_distance_arg(self, line):
-        ''' helper method to parse alt argument '''
-        distance = None
-        try:
-            match = re.search(r'distance=(\d+)', line)
-            if match is not None:
-                distance = int(match.group(1))
-        except:
-            pass
-        return distance
-
-    def _parse_heading_arg(self, line):
-        ''' helper method to parse alt argument '''
-        heading = None
-        try:
-            match = re.search(r'heading=(\d+)', line)
-            if match is not None:
-                heading = int(match.group(1))
-        except:
-            pass
-        return heading
 
