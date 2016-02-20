@@ -1,0 +1,7 @@
+dronekit==2.2.0
+dronekit-sitl==3.0.1
+LatLon==1.0.2
+psutil==4.0.0
+pymavlink==1.1.70
+pyproj==1.9.5.1
+requests==2.9.1
