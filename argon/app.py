@@ -9,8 +9,8 @@ class App(Cmd):
 
     prompt = '# '
     range_limit = 1000
-    launch_alt = 15
-    min_alt = 5
+    launch_alt = 5
+    min_alt = 3
     max_alt = 100
 
     def cmdloop(self):
