@@ -1,0 +1,21 @@
+#!/bin/bash
+
+
+# run test console
+if [[ "$1" == "test" ]]
+then
+    ./env/bin/python test.py
+fi
+
+# run test simultor
+if [[ "$1" == "sim" ]]
+then
+    ./env/bin/dronekit-sitl copter --home=41.9751961,-87.6636616,0,0
+fi
+
+# run console app
+if [[ -z "$1" ]]
+then
+    ./env/bin/python console.py
+fi
+
