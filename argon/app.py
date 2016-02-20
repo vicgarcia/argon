@@ -27,7 +27,7 @@ class App(Cmd):
         self.max_alt = 100
         # clear incoming console, print intro banner
         os.system('clear')
-        print '# lanyard : dronekit-based custom flight control console \n'
+        print '# argon : dronekit-based custom flight control console \n'
         # connect to drone with connect param, exit if this fails
         print 'connecting to drone'
         try:
@@ -50,9 +50,9 @@ class App(Cmd):
         os.system('clear')
 
     def do_version(self, args):
-        ''' print current version of lanyard and vehicle firmware version '''
+        ''' print current version of argon and vehicle firmware version '''
         print
-        print 'lanyard version 1.0'
+        print 'argon version 1.0'
         self.vehicle.wait_ready('autopilot_version')
         print 'vehicle firmware version {}'.format(self.vehicle.version)
         print '\n'
@@ -73,7 +73,7 @@ class App(Cmd):
         print '  display this text'
         print
         print 'version'
-        print '  print the lanyard version number'
+        print '  print the argon version number'
         print
         print 'clear'
         print '  clear console history'
@@ -160,13 +160,6 @@ class App(Cmd):
         print '\n'
 
     # flight control
-
-    def do_arm(self, args):
-        print
-        print 'arming vehicle'
-        if not self.vehicle.armed:
-            self.vehicle.armed = True
-        print '\n'
 
     def do_launch(self, args):
         ''' arm and launch drone, loiter at provided altitude parameter (meters) '''
