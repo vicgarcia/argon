@@ -2,6 +2,7 @@ import os, sys, time, re
 from cmd import Cmd
 from LatLon import LatLon
 from dronekit import VehicleMode, LocationGlobalRelative
+import argsparse
 
 
 class App(Cmd):
@@ -27,7 +28,7 @@ class App(Cmd):
         self.max_alt = 100
         # clear incoming console, print intro banner
         os.system('clear')
-        print '# lanyard : dronekit-based custom flight control console \n'
+        print '# argon : dronekit-based custom flight control console \n'
         # connect to drone with connect param, exit if this fails
         print 'connecting to drone'
         try:
@@ -50,9 +51,9 @@ class App(Cmd):
         os.system('clear')
 
     def do_version(self, args):
-        ''' print current version of lanyard and vehicle firmware version '''
+        ''' print current version of argon and vehicle firmware version '''
         print
-        print 'lanyard version 1.0'
+        print 'argon version 1.0'
         self.vehicle.wait_ready('autopilot_version')
         print 'vehicle firmware version {}'.format(self.vehicle.version)
         print '\n'
@@ -73,7 +74,7 @@ class App(Cmd):
         print '  display this text'
         print
         print 'version'
-        print '  print the lanyard version number'
+        print '  print the argon version number'
         print
         print 'clear'
         print '  clear console history'
@@ -109,7 +110,7 @@ class App(Cmd):
         print '  optionally priovide an altitude to use at final position'
         print '  vehicle will maintain current altitude if none provided'
         print
-        print 'move --head=# --dist=# --alt=#'
+        print 'move --heading=# --distance=# --altitude=#'
         print '  signal vehicle to move a distance, along a heading, to an altitude'
         print '  must provide head/dist together, optionally provide altitude'
         print '  providing only an altitude will change vehicle altitude'
@@ -239,40 +240,38 @@ class App(Cmd):
     def do_position(self, args):
         ''' move to the location provided as --lat/--lng, --alt optional '''
         print
-        # check vehicle mode and status
+        # pre-check vehicle mode and status
         if self.vehicle.system_status.state != 'ACTIVE' \
                 and self.vehicle.mode.name != 'GUIDED':
-            print 'vehicle must be ACTIVE and in GUIDED mode \n'
+            print 'vehicle must be ACTIVE and in GUIDED mode\n\n'
             return
-        # parse arguments
-        location = self.vehicle.location.global_relative_frame
-        lat, lng = self._parse_latlng_arg(args)
-        alt = self._parse_alt_arg(args)
-        # verify lat/lng provided, point is within 1000m of current
+        # parse arguments and verify lat/lng, handle alt as optional
+        loc = self.vehicle.location.global_relative_frame
+        lat, lng, alt = argsparse.location(args)
         if lat is None or lng is None:
-            print 'invalid params, must provide --lat/--lng, --alt optional \n'
+            print 'invalid params, must provide --lat/--lng, --alt optional\n\n'
             return
         else:
-            current = LatLon(location.lat, location.lon)
-            update = LatLon(lat, lng)
-            if (current.distance(update) * 1000) > self.range_limit:
-                print 'new position is outside control range \n'
+            # verify lat/lng provided, point is within 1000m of current
+            current = LatLon(loc.lat, loc.lon)
+            new = LatLon(lat, lng)
+            if (current.distance(new) * 1000) > self.range_limit:
+                print 'new position is outside control range\n\n'
                 return
         # verify altitude doesn't exceed min/max, if not provided use current
         if alt is not None:
             if alt > self.max_alt:
-                print 'altitude exceeds maximum of {}m \n'.format(self.max_alt)
+                print 'altitude exceeds maximum of {}m\n\n'.format(self.max_alt)
                 return
             if alt < self.min_alt:
-                print 'altitude is below minimum of {}m \n'.format(self.max_alt)
+                print 'altitude is below minimum of {}m\n\n'.format(self.max_alt)
                 return
         else:
-            alt = location.alt
+            alt = loc.alt
         # issue move command
         print 'update vehicle position'
         self.vehicle.simple_goto(LocationGlobalRelative(lat, lng, alt))
-        print '... position update command issued'
-        print '\n'
+        print '... position update command issued\n\n'
 
     def do_move(self, args):
         ''' move to position via --head/--dist and/or --alt '''
@@ -343,32 +342,6 @@ class App(Cmd):
         ''' rotate vehicle to --head and take photo '''
         pass
 
-    # grid planning
-
-    def do_grid(self, args):
-        ''' calculate grid markers based on --lat/--lng, --int/--max '''
-        print
-        directions = [('north', 0), ('east', 90), ('south', 180), ('west', 270)]
-        # XXX sort this out, also position below
-        #lat, lng = self._parse_latlng_arg(args)
-        location = self.vehicle.location.global_relative_frame
-        position = LatLon(location.lat, location.lon)
-        # parse and verify, or use default
-        #maximum = self._parse_maximum_arg(args)
-        maximum = 120.0
-        #interval = self._parse_interval_arg(args)
-        interval = 30.0
-        print 'center\n{}, {}\n'.format(location.lat, location.lon)
-        for name, heading in directions:
-            current = 0.0
-            print name
-            while current < maximum:
-                current += interval  # starts at 0, add at top of iteration
-                lt, lg = position.offset(heading, current/1000).to_string('D')
-                print '{}m : {}, {}'.format(current, lt, lg)
-            print
-        print
-
     # argument parsing helpers
 
     def _parse_countdelay_arg(self, line):
@@ -394,27 +367,6 @@ class App(Cmd):
             delay = 3
         return ( count, delay )
 
-    def _parse_latlng_arg(self, line):
-        ''' helper method to parse lat/lng arguments '''
-        # parse latitude
-        latitude = None
-        try:
-            match = re.search(r'lat=(-?\d+.\d+)', line)
-            if match is not None:
-                latitude = float(match.group(1))
-        except:
-            pass
-        # parse longitude
-        longitude = None
-        try:
-            match = re.search(r'lng=(-?\d+.\d+)', line)
-            if match is not None:
-                longitude = float(match.group(1))
-        except:
-            pass
-        # return as (lat, lng) tuple, float or None
-        return ( latitude, longitude )
-
     def _parse_alt_arg(self, line):
         ''' helper method to parse alt argument '''
         altitude = None
@@ -430,7 +382,7 @@ class App(Cmd):
         ''' helper method to parse alt argument '''
         distance = None
         try:
-            match = re.search(r'dist=(\d+)', line)
+            match = re.search(r'distance=(\d+)', line)
             if match is not None:
                 distance = int(match.group(1))
         except:
@@ -441,7 +393,7 @@ class App(Cmd):
         ''' helper method to parse alt argument '''
         heading = None
         try:
-            match = re.search(r'head=(\d+)', line)
+            match = re.search(r'heading=(\d+)', line)
             if match is not None:
                 heading = int(match.group(1))
         except:
@@ -452,7 +404,7 @@ class App(Cmd):
         ''' helper method to parse alt argument '''
         interval = None
         try:
-            match = re.search(r'int=(\d+)', line)
+            match = re.search(r'interval=(\d+)', line)
             if match is not None:
                 interval = int(match.group(1))
         except:
@@ -463,7 +415,7 @@ class App(Cmd):
         ''' helper method to parse alt argument '''
         maximum = None
         try:
-            match = re.search(r'max=(\d+)', line)
+            match = re.search(r'maximum=(\d+)', line)
             if match is not None:
                 maximum = int(match.group(1))
         except:
