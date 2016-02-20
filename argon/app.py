@@ -221,7 +221,7 @@ class App(Cmd):
         # check vehicle mode and status
         if self.vehicle.system_status.state != 'ACTIVE' \
                 and self.vehicle.mode.name != 'GUIDED':
-            print ' vehicle must be ACTIVE and in GUIDED mode\n'
+            print 'vehicle must be ACTIVE and in GUIDED mode\n'
             return
         # parse arguments
         location = self.vehicle.location.global_relative_frame
@@ -231,44 +231,44 @@ class App(Cmd):
         # verify altitude, or use current if not provided
         if alt is not None:
             if alt > self.max_alt:
-                print ' altitude exceeds maximum of {}m\n'.format(self.max_alt)
+                print 'altitude exceeds maximum of {}m\n'.format(self.max_alt)
                 return
             if alt < self.min_alt:
-                print ' altitude is below minimum of {}m\n'.format(self.max_alt)
+                print 'altitude is below minimum of {}m\n'.format(self.max_alt)
                 return
         else:
             alt = location.alt
         # must provide heading and distance, or neither, verify values
         if (heading != None and distance == None) \
                 or (heading == None and distance != None):
-            print ' must provide --head/--dist together, or not at all \n'
+            print 'must provide --head/--dist together, or not at all \n'
             return
         elif (heading == None and distance == None and alt == None):
-            print ' must provide --head/--dist, and/or --alt params \n'
+            print 'must provide --head/--dist, and/or --alt params \n'
             return
         else:
             # verify heading is between 0 and 359
             if heading:
                 if heading < 0 or heading > 369:
-                    print ' must provide a valid heading between 0 and 359 \n'
+                    print 'must provide a valid heading between 0 and 359 \n'
                     return
             # verify distance is less than 200 m
             if distance:
                 if distance < 1 or distance > 200:
-                    print ' must provide a valid distance between 1 and 200 m \n'
+                    print 'must provide a valid distance between 1 and 200 m \n'
                     return
         # calculate lat/lng position from params or use existing
-        print ' update vehicle position'
+        print 'update vehicle position'
         if heading and distance:
             current = LatLon(location.lat, location.lon)
             lat, lng = self._calculate_offset(current, heading, distance)
-            print '  ... calculate new position from parameters'
+            print '... calculate new position from parameters'
         else:
             lat, lng = (location.lat, location.lon)
-            print '  ... calculate new altitude'
+            print '... calculate new altitude'
         # issue move command
         self.vehicle.simple_goto(LocationGlobalRelative(lat, lng, alt))
-        print '  ... position update command issued'
+        print '... position update command issued'
         print
 
     def _calculate_offset(self, position, heading, distance):
