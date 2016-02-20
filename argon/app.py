@@ -14,7 +14,7 @@ class App(Cmd):
             Cmd.cmdloop(self)
         except KeyboardInterrupt:
             # handle a ctrl-C by moving to new/blank console line
-            print '\n'
+            print
             self.cmdloop()
 
     # application startup
@@ -28,21 +28,19 @@ class App(Cmd):
         self.max_alt = 100
         # clear incoming console, print intro banner
         os.system('clear')
-        print '# argon : dronekit-based custom flight control console \n'
+        print '# argon : dronekit-based custom flight control console\n'
         # connect to drone with connect param, exit if this fails
         print 'connecting to drone'
         try:
             print '... waiting on connection'
             self.vehicle = connect()
-            print '... connected \n'
+            print '... connected\n'
         except Exception, e:
-            print '... unable to connect \n'
+            print '... unable to connect\n'
             sys.exit(1)
         except KeyboardInterrupt:
-            print '... cancelling connection attempt \n'
+            print '... cancelling connection attempt\n'
             sys.exit(1)
-        # help hint above initial prompt
-        print "use 'help' to get information about available commands \n"
 
     # application functionality
 
@@ -52,122 +50,78 @@ class App(Cmd):
 
     def do_version(self, args):
         ''' print current version of argon and vehicle firmware version '''
-        print
         print 'argon version 1.0'
         self.vehicle.wait_ready('autopilot_version')
         print 'vehicle firmware version {}'.format(self.vehicle.version)
-        print '\n'
+        print
 
     def do_exit(self, args):
         ''' close connection to vehicle and exit console environment '''
-        print
         print 'closing connection'
         self.vehicle.close()
-        print '\n'
+        print
         sys.exit(1)
 
     def do_help(self, args):
-        print
-        print 'available commands'
-        print
-        print 'help'
-        print '  display this text'
-        print
-        print 'version'
-        print '  print the argon version number'
-        print
-        print 'clear'
-        print '  clear console history'
-        print
-        print 'exit'
-        print '  exit the console app'
-        print
-        print 'status'
-        print '  get status of connected drone'
-        print
-        print 'telemetry --count=# --delay=#'
-        print '  print vehicle telemetry date, optionally repeat at intervals'
-        print '  --count is the number of times to retrieve the telemetry data'
-        print '  --delay is the ammount of time to wait between getting the data'
-        print '  the execution of the telemetry command can be broken with CTRL-C'
-        print
-        print 'config <KEY> <VALUE>'
-        print '  update or print all configuration values from vehicle'
-        print '  providing a KEY and VALUE will update that parameter'
-        print '  all current vehicle parameters are outputted when not'
-        print
-        print 'launch'
-        print '  initiate the launch sequence for the vehicle'
-        print '  requires that vehicle is not already active'
-        print
-        print 'land'
-        print '  initiate the landing sequence for the vehicle'
-        print '  requires that the vehicle is active'
-        print '  this will land vehicle at current position, see return'
-        print
-        print 'position --lat=# --lng=# --alt=#'
-        print '  signal vehicle to move to a lat/lng position'
-        print '  optionally priovide an altitude to use at final position'
-        print '  vehicle will maintain current altitude if none provided'
-        print
-        print 'move --heading=# --distance=# --altitude=#'
-        print '  signal vehicle to move a distance, along a heading, to an altitude'
-        print '  must provide head/dist together, optionally provide altitude'
-        print '  providing only an altitude will change vehicle altitude'
-        print '  final position is calculated and signalled to vehicle'
-        print '  vehicle will maintain current altitude if none provided'
-        print
-        print 'return'
-        print '  signal vehicle to return to home and land'
-        print '  requires that the vehicle is active'
-        print '  this command will not block while the vehicle responds'
-        print
-        print
+        with open('help.txt', 'r') as help:
+            print help.read()
 
     # vehicle overview
 
     def do_status(self, args):
         ''' get system status from the vehicle '''
-        print
         print 'system: {}'.format(self.vehicle.system_status.state)
         print 'mode: {}'.format(self.vehicle.mode.name)
         print 'armed: {}'.format(self.vehicle.armed)
-        print '\n'
+        print
 
     def do_telemetry(self, args):
         ''' get telemetry data from the vehicle, accepts --count/--delay '''
-        count, delay = self._parse_countdelay_arg(args)
+        # parse arguments
+        count = argsparse.count(args)
+        delay = argsparse.delay(args)
+        # enforce minimum count of 1
+        if count == None:
+            count = 1
+        # enforce minimum of 3 second delay
+        if delay < 3:
+            delay = 3
         for i in range(count):
             location = self.vehicle.location.global_relative_frame
-            print
             print 'position: {}, {}'.format(location.lat, location.lon)
             print 'altitude: {}m'.format(location.alt)
             print 'heading: {}'.format(self.vehicle.heading)
             print 'speed: {}'.format(self.vehicle.airspeed)
-            if (i + 1) != count:
+            print 'battery: {}'.format(self.vehicle.battery.level)
+            print
+            # don't pause for delay on the last iteration
+            if (i + 1) < count:
                 time.sleep(delay)
-        print '\n'
 
     def do_config(self, args):
         ''' get or set configuration parameters from the vehicle '''
-        print
-        key, value = self._parse_config_args(args)
+        key, value = None, None
+        # check for a key value argument pair
+        args = line.split(' ')
+        if len(args) == 2:
+            key = args[0]
+            value = args[2]
         if key and value:
+            # update the parameter with provided key and value
             self.vehicle.parameters[key] = value
             print 'updated {} with {}'.format(key, value)
         else:
+            # output all vehicle parameters with key and value
             for k, v in self.vehicle.parameters.iteritems():
                 print '{} = {}'.format(k, v)
-        print '\n'
+        print
 
     # flight control
 
     def do_launch(self, args):
         ''' arm and launch drone, loiter at provided altitude parameter (meters) '''
-        print
         if self.vehicle.system_status.state == 'ACTIVE':
-            print 'vehicle cannot already be ACTIVE'
-            print '\n'
+            print 'vehicle cannot already be ACTIVE\n'
             return
         print 'begining launching sequence'
         print '... preflight checks and arm vehicle'
@@ -196,14 +150,12 @@ class App(Cmd):
                 )
         else:
             print '... an error occured while arming the vehicle'
-        print '\n'
+        print
 
     def do_land(self, args):
         ''' set the drone to descend and land at the current location '''
-        print
         if self.vehicle.system_status.state != 'ACTIVE':
-            print 'vehicle must be ACTIVE'
-            print '\n'
+            print 'vehicle must be ACTIVE\n'
             return
         print 'begin landing sequence'
         self.vehicle.mode = VehicleMode("LAND")
@@ -216,63 +168,60 @@ class App(Cmd):
             time.sleep(7)
         # success output
         print '... landing successful, vehicle shutdown'
-        print '\n'
+        print
 
     def do_return(self, args):
         ''' set the drone to RTL mode to execute automatic return/landing '''
-        print
         if self.vehicle.system_status.state != 'ACTIVE':
-            print 'vehicle must be ACTIVE'
-            print '\n'
+            print 'vehicle must be ACTIVE\n'
             return
         print 'signal vehicle for return and land'
         self.vehicle.mode = VehicleMode('RTL')
         print '... RTL command issued'
-        print '\n'
+        print
 
     def do_position(self, args):
         ''' move to the location provided as --lat/--lng, --alt optional '''
-        print
         # pre-check vehicle mode and status
         if self.vehicle.system_status.state != 'ACTIVE' \
                 and self.vehicle.mode.name != 'GUIDED':
-            print 'vehicle must be ACTIVE and in GUIDED mode\n\n'
+            print 'vehicle must be ACTIVE and in GUIDED mode\n'
             return
         # parse arguments and verify lat/lng, handle alt as optional
         loc = self.vehicle.location.global_relative_frame
-        lat, lng, alt = argsparse.location(args)
+        lat, lng, alt = argsparse.position(args)
         if lat is None or lng is None:
-            print 'invalid params, must provide --lat/--lng, --alt optional\n\n'
+            print 'invalid params, must provide --lat/--lng, --alt optional\n'
             return
         else:
             # verify lat/lng provided, point is within 1000m of current
             current = LatLon(loc.lat, loc.lon)
             new = LatLon(lat, lng)
             if (current.distance(new) * 1000) > self.range_limit:
-                print 'new position is outside control range\n\n'
+                print 'new position is outside control range\n'
                 return
         # verify altitude doesn't exceed min/max, if not provided use current
         if alt is not None:
             if alt > self.max_alt:
-                print 'altitude exceeds maximum of {}m\n\n'.format(self.max_alt)
+                print 'altitude exceeds maximum of {}m\n'.format(self.max_alt)
                 return
             if alt < self.min_alt:
-                print 'altitude is below minimum of {}m\n\n'.format(self.max_alt)
+                print 'altitude is below minimum of {}m\n'.format(self.max_alt)
                 return
         else:
             alt = loc.alt
         # issue move command
         print 'update vehicle position'
         self.vehicle.simple_goto(LocationGlobalRelative(lat, lng, alt))
-        print '... position update command issued\n\n'
+        print '... position update command issued'
+        print
 
     def do_move(self, args):
         ''' move to position via --head/--dist and/or --alt '''
         # check vehicle mode and status
         if self.vehicle.system_status.state != 'ACTIVE' \
                 and self.vehicle.mode.name != 'GUIDED':
-            print ' vehicle must be ACTIVE and in GUIDED mode'
-            print '\n'
+            print ' vehicle must be ACTIVE and in GUIDED mode\n'
             return
         # parse arguments
         location = self.vehicle.location.global_relative_frame
@@ -337,29 +286,6 @@ class App(Cmd):
 
     # argument parsing helpers
 
-    def _parse_countdelay_arg(self, line):
-        ''' helper method to parse count/delay arguments '''
-        # parse count
-        count = 1
-        try:
-            match = re.search(r'count=(\d+)', line)
-            if match is not None:
-                count = int(match.group(1))
-        except:
-            pass
-        # parse delay
-        delay = 0
-        try:
-            match = re.search(r'delay=(\d+)', line)
-            if match is not None:
-                delay = int(match.group(1))
-        except:
-            pass
-        # enforce a min 3 second delay
-        if count > 1 and delay < 3:
-            delay = 3
-        return ( count, delay )
-
     def _parse_alt_arg(self, line):
         ''' helper method to parse alt argument '''
         altitude = None
@@ -392,34 +318,4 @@ class App(Cmd):
         except:
             pass
         return heading
-
-    def _parse_interval_arg(self, line):
-        ''' helper method to parse alt argument '''
-        interval = None
-        try:
-            match = re.search(r'interval=(\d+)', line)
-            if match is not None:
-                interval = int(match.group(1))
-        except:
-            pass
-        return interval
-
-    def _parse_maximum_arg(self, line):
-        ''' helper method to parse alt argument '''
-        maximum = None
-        try:
-            match = re.search(r'maximum=(\d+)', line)
-            if match is not None:
-                maximum = int(match.group(1))
-        except:
-            pass
-        return maximum
-
-    def _parse_config_args(self, line):
-        key, value = None, None
-        args = line.split(' ')
-        if len(args) == 2:
-            key = args[0]
-            value = args[2]
-        return key, value
 
