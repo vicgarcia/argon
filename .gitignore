@@ -1,0 +1,9 @@
+# virtualenv path
+env/*
+
+# .pyc files
+*.pyc
+
+# log files
+*.log
+
