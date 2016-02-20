@@ -1,0 +1,54 @@
+argon : available commands
+
+help
+  display this text
+
+version
+  print the argon version number
+
+clear
+  clear console history
+
+exit
+  exit the console app
+
+status
+  get status of connected drone
+
+telemetry --count=# --delay=#
+  print vehicle telemetry date, optionally repeat at intervals
+  --count is the number of times to retrieve the telemetry data
+  --delay is the ammount of time to wait between getting the data
+  the execution of the telemetry command can be broken with CTRL-C
+
+config <KEY> <VALUE>
+  update or print all configuration values from vehicle
+  providing a KEY and VALUE will update that parameter
+  all current vehicle parameters are outputted when not
+
+launch
+  initiate the launch sequence for the vehicle
+  requires that vehicle is not already active
+
+position --lat=# --lng=# --alt=#
+  signal vehicle to move to a lat/lng position
+  optionally priovide an altitude to use at final position
+  vehicle will maintain current altitude if none provided
+
+move --heading=# --distance=# --altitude=#
+  signal vehicle to move a distance, along a heading, to an altitude
+  must provide head/dist together, optionally provide altitude
+  providing only an altitude will change vehicle altitude
+  final position is calculated and signalled to vehicle
+  vehicle will maintain current altitude if none provided
+
+land
+  initiate the landing sequence for the vehicle
+  requires that the vehicle is active
+  this will land vehicle at current position, see return
+
+return
+  signal vehicle to return to home and land
+  requires that the vehicle is active
+  this command will not block while the vehicle responds
+
