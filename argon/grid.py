@@ -1,19 +1,35 @@
-# grid planning
+import argsparse
+from LatLon import LatLon
 
-def do_grid(self, args):
-    ''' calculate grid markers based on --lat/--lng, --int/--max '''
+
+def do_grid(args):
+    ''' calculate grid markers based on --latitude/--longitude,
+        when provided, use --interval/--maximum to determine points
+    '''
+    directions = [ ('north', 0), ('east', 90), ('south', 180), ('west', 270) ]
+
+    # get lat/lng from args
+    latitude = argsparse.latitude(args)
+    longitude = argsparse.longitude(args)
+    if latitude == None or longitude == None:
+        print 'must provide valid --latitude and --longitude arguments'
+        return
+
+    # parse interval/maximum or work with 30/150 as defaults
+    interval = argsparse.interval(args)
+    if interval is None:
+        interval = 30.0
+    else:
+        interval = float(interval)
+    maximum = argsparse.maximum(args)
+    if maximum is None:
+        maximum = 150.0
+    else:
+        maximum = float(maximum)
+
     print
-    directions = [('north', 0), ('east', 90), ('south', 180), ('west', 270)]
-    # XXX sort this out, also position below
-    #lat, lng = self._parse_latlng_arg(args)
-    location = self.vehicle.location.global_relative_frame
-    position = LatLon(location.lat, location.lon)
-    # parse and verify, or use default
-    #maximum = self._parse_maximum_arg(args)
-    maximum = 120.0
-    #interval = self._parse_interval_arg(args)
-    interval = 30.0
-    print 'center\n{}, {}\n'.format(location.lat, location.lon)
+    position = LatLon(latitude, longitude)
+    # iterate over directions, print points at interval to maximum
     for name, heading in directions:
         current = 0.0
         print name
@@ -22,6 +38,4 @@ def do_grid(self, args):
             lt, lg = position.offset(heading, current/1000).to_string('D')
             print '{}m : {}, {}'.format(current, lt, lg)
         print
-    print
-
 
