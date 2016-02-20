@@ -162,13 +162,6 @@ class App(Cmd):
 
     # flight control
 
-    def do_arm(self, args):
-        print
-        print 'arming vehicle'
-        if not self.vehicle.armed:
-            self.vehicle.armed = True
-        print '\n'
-
     def do_launch(self, args):
         ''' arm and launch drone, loiter at provided altitude parameter (meters) '''
         print
