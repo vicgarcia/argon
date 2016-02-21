@@ -26,6 +26,11 @@ config <KEY> <VALUE>
   providing a KEY and VALUE will update that parameter
   all current vehicle parameters are outputted when not
 
+mode <mode>
+  update the vehicle's mode to 'standard, 'loiter', or 'guided'
+  standard is altitude hold mode, it and loiter are for manual control
+  guided mode will allow the vehicle to recieve direction from argon
+
 launch
   initiate the launch sequence for the vehicle
   requires that vehicle is not already active

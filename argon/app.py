@@ -116,6 +116,21 @@ class App(Cmd):
                 print '{} = {}'.format(k, v)
         print
 
+    def do_mode(self, arg):
+        ''' set vehicle mode to 'guided', 'loiter', 'standard' (alt hold) '''
+        modes = {
+                'standard':  VehicleMode('ALT_HOLD'),
+                'loiter':    VehicleMode('LOITER'),
+                'guided':    VehicleMode('GUIDED'),
+            }
+        if arg not in [ 'loiter', 'guided', 'standard' ]:
+            print "must provide a mode, 'standard', 'guided', or 'loiter'\n"
+            return
+        else:
+            print 'switching to {} mode'.format(arg)
+            self.vehicle.mode = modes[arg]
+            print
+
     # flight control
 
     def do_launch(self, args):
