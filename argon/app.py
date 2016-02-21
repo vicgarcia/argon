@@ -138,25 +138,36 @@ class App(Cmd):
         if self.vehicle.system_status.state == 'ACTIVE':
             print 'vehicle cannot already be ACTIVE\n'
             return
+        # verify altitude doesn't exceed min/max, if not provided default to 10 m
+        altitude = argsparse.altitude(args)
+        if altitude is not None:
+            if altitude > self.max_alt:
+                print 'altitude exceeds maximum of {}m\n'.format(self.max_alt)
+                return
+            if altitude < self.min_alt:
+                print 'altitude is below minimum of {}m\n'.format(self.max_alt)
+                return
+        else:
+            altitude = 10
+        # arm and launch the vehicle
         print 'begining launching sequence'
         print '... preflight checks and arm vehicle'
         if not self.vehicle.armed:
-            # arm the vehicle and verify
-            self.vehicle.mode = VehicleMode("GUIDED")
             self.vehicle.armed = True
-            time.sleep(3)   # an initial 3 second pause
+            time.sleep(5)   # an initial 5 second pause
             while not self.vehicle.armed:
                 print '... waiting on vehicle to arm'
                 time.sleep(3)
         if self.vehicle.armed:
+            self.vehicle.mode = VehicleMode("GUIDED")
             print '... liftoff and approach target altitude'
-            self.vehicle.simple_takeoff(self.launch_alt)
+            self.vehicle.simple_takeoff(altitude)
             # verify drone reaching altitude before returning
             time.sleep(2)   # an initial 3 second pause
             while True:
                 print '... approaching target altitude'
                 current_altitude = self.vehicle.location.global_relative_frame.alt
-                if current_altitude >= self.launch_alt * 0.95:
+                if current_altitude >= altitude * 0.95:
                     break
                 time.sleep(3)
             # success output
