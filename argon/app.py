@@ -8,17 +8,15 @@ import argsparse
 class App(Cmd):
 
     prompt = '# '
-    range_limit = 1000
-    launch_alt = 5
-    min_alt = 3
+    range_limit = 500       # 500m range
+    min_alt = 3             # 3m-100m altitude envelope
     max_alt = 100
 
     def cmdloop(self):
         try:
             Cmd.cmdloop(self)
         except KeyboardInterrupt:
-            # handle a ctrl-C by moving to new/blank console line
-            print
+            print   # handle a ctrl-C by moving to new/blank console line
             self.cmdloop()
 
     # application startup
@@ -28,17 +26,18 @@ class App(Cmd):
         # clear incoming console, print intro banner
         os.system('clear')
         print '# argon : dronekit-based custom flight control console\n'
-        # connect to drone with connect param, exit if this fails
+        # connect to drone, use connect param as function, exit if this fails
         print 'connecting to drone'
         try:
             print '... waiting on connection'
             self.vehicle = connect()
             print '... connected\n'
-        except Exception, e:
-            print '... unable to connect\n'
-            sys.exit(1)
         except KeyboardInterrupt:
             print '... cancelling connection attempt\n'
+            sys.exit(1)
+        except Exception, e:
+            print e.message
+            print '... unable to connect\n'
             sys.exit(1)
 
     # application functionality
@@ -52,14 +51,12 @@ class App(Cmd):
         print 'argon version 1.0'
         self.vehicle.wait_ready('autopilot_version')
         print 'vehicle firmware version {}'.format(self.vehicle.version)
-        print self.prompt
         print
 
     def do_exit(self, args):
         ''' close connection to vehicle and exit console environment '''
-        print 'closing connection'
+        print 'closing connection\n'
         self.vehicle.close()
-        print
         sys.exit(1)
 
     def do_help(self, args):
@@ -69,7 +66,11 @@ class App(Cmd):
     # vehicle state
 
     def do_status(self, args):
-        ''' get system status from the vehicle '''
+        ''' get system status from the vehicle
+              system (active or standby)
+              mode (guided, loiter, alt_hold, rtl, land)
+              armed (true or false)
+        '''
         print 'system: {}'.format(self.vehicle.system_status.state)
         print 'mode: {}'.format(self.vehicle.mode.name)
         print 'armed: {}'.format(self.vehicle.armed)
@@ -105,7 +106,7 @@ class App(Cmd):
         args = line.split(' ')
         if len(args) == 2:
             key = args[0]
-            value = args[2]
+            value = args[1]
         if key and value:
             # update the parameter with provided key and value
             self.vehicle.parameters[key] = value
@@ -275,12 +276,12 @@ class App(Cmd):
         else:
             # verify heading is between 0 and 359
             if heading:
-                if heading < 0 or heading > 369:
+                if heading <= 0 or heading >= 359:
                     print 'must provide a valid heading between 0 and 359 \n'
                     return
             # verify distance is less than 200 m
             if distance:
-                if distance < 1 or distance > 200:
+                if distance <= 1 or distance >= 200:
                     print 'must provide a valid distance between 1 and 200 m \n'
                     return
         # calculate lat/lng position from params or use existing
