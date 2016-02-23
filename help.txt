@@ -13,7 +13,7 @@ exit
   exit the console app
 
 status
-  get status of connected drone
+  get status of the vehicle
 
 telemetry
   print vehicle telemetry data to the console
@@ -30,8 +30,8 @@ config <KEY> <VALUE>
   all current vehicle parameters are outputted when not
 
 mode <mode>
-  update the vehicle's mode to 'standard, 'loiter', or 'guided'
-  standard is altitude hold mode, it and loiter are for manual control
+  update the vehicle's mode to 'manual, 'loiter', or 'guided'
+  manual is altitude hold mode, it and loiter are for manual control
   guided mode will allow the vehicle to recieve direction from argon
 
 launch
