@@ -15,11 +15,14 @@ exit
 status
   get status of connected drone
 
-telemetry --count=# --delay=#
-  print vehicle telemetry date, optionally repeat at intervals
-  --count is the number of times to retrieve the telemetry data
-  --delay is the ammount of time to wait between getting the data
-  the execution of the telemetry command can be broken with CTRL-C
+telemetry
+  print vehicle telemetry data to the console
+
+monitor --delay=#
+  print vehicle telemetry data to the console in a continous loop
+  optionally provide a delay in seconds, minimum of 3, default of 10
+  --delay is the ammount of time to wait between printing the telemetry data
+  the loop will continue until broken with CTRL-C
 
 config <KEY> <VALUE>
   update or print all configuration values from vehicle

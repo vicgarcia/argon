@@ -77,27 +77,41 @@ class App(Cmd):
         print
 
     def do_telemetry(self, args):
-        ''' get telemetry data from the vehicle, accepts --count/--delay '''
+        ''' get telemetry data, once '''
+        self._print_telemetry()
+        print
+
+    def do_monitor(self, args):
+        ''' get telemetry data, continously, optional --delay '''
         # parse arguments
-        count = argsparse.count(args)
         delay = argsparse.delay(args)
-        # enforce minimum count of 1
-        if count == None:
-            count = 1
-        # enforce minimum of 3 second delay
-        if delay < 3:
-            delay = 3
-        for i in range(count):
-            location = self.vehicle.location.global_relative_frame
-            print 'position: {}, {}'.format(location.lat, location.lon)
-            print 'altitude: {}m'.format(location.alt)
-            print 'heading: {}'.format(self.vehicle.heading)
-            print 'speed: {}'.format(self.vehicle.airspeed)
-            print 'battery: {}'.format(self.vehicle.battery.level)
-            print
-            # don't pause for delay on the last iteration
-            if (i + 1) < count:
+        # enforce minimum of 3 second delay, default to 10 seconds
+        if delay is not None:
+            if delay < 3:
+                delay = 3
+        else:
+            delay = 10
+        # begin monitoring loop
+        try:
+            while True:
+                print
+                self._print_telemetry()
                 time.sleep(delay)
+        except KeyboardInterrupt:
+            print
+        print
+
+    def _print_telemetry(self):
+        ''' print the telemetry data from vehicle to the console '''
+        location = self.vehicle.location.global_relative_frame
+        print 'position: {}, {}'.format(location.lat, location.lon)
+        print 'altitude: {}m'.format(location.alt)
+        print 'heading: {}'.format(self.vehicle.heading)
+        print 'speed: {}'.format(self.vehicle.airspeed)
+        print 'battery: {} / {:.3}'.format(
+                self.vehicle.battery.voltage,
+                self.vehicle.parameters['FS_BATT_VOLTAGE']
+            )
 
     def do_config(self, args):
         ''' get or set configuration parameters from the vehicle '''
