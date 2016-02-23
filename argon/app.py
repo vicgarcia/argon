@@ -181,8 +181,7 @@ class App(Cmd):
 
     def do_land(self, args):
         ''' set the drone to descend and land at the current location '''
-        if self.vehicle.system_status.state != 'ACTIVE':
-            print 'vehicle must be ACTIVE\n'
+        if self._vehicle_is_not_active():
             return
         print 'begin landing sequence'
         self.vehicle.mode = VehicleMode("LAND")
@@ -199,8 +198,7 @@ class App(Cmd):
 
     def do_return(self, args):
         ''' set the drone to RTL mode to execute automatic return/landing '''
-        if self.vehicle.system_status.state != 'ACTIVE':
-            print 'vehicle must be ACTIVE\n'
+        if self._vehicle_is_not_active():
             return
         print 'signal vehicle for return and land'
         self.vehicle.mode = VehicleMode('RTL')
@@ -209,10 +207,10 @@ class App(Cmd):
 
     def do_position(self, args):
         ''' move to the location provided as --lat/--lng, --alt optional '''
-        # pre-check vehicle mode and status
-        if self.vehicle.system_status.state != 'ACTIVE' \
-                and self.vehicle.mode.name != 'GUIDED':
-            print 'vehicle must be ACTIVE and in GUIDED mode\n'
+        # check vehicle status and mode
+        if self._vehicle_is_not_active():
+            return
+        if self._vehicle_is_not_in_guided_mode():
             return
         # parse arguments and verify lat/lng, handle alt as optional
         loc = self.vehicle.location.global_relative_frame
@@ -245,12 +243,12 @@ class App(Cmd):
 
     def do_move(self, args):
         ''' move to position via --heading/--distance and/or --altitude '''
-        # check vehicle mode and status
-        if self.vehicle.system_status.state != 'ACTIVE' \
-                and self.vehicle.mode.name != 'GUIDED':
-            print 'vehicle must be ACTIVE and in GUIDED mode\n'
+        # check vehicle status and mode
+        if self._vehicle_is_not_active():
             return
-        # parse arguments
+        if self._vehicle_is_not_in_guided_mode():
+            return
+        # parse arguments from console
         location = self.vehicle.location.global_relative_frame
         heading = argsparse.heading(args)
         distance = argsparse.distance(args)
@@ -310,4 +308,27 @@ class App(Cmd):
     def do_photo(self, args):
         ''' rotate vehicle to --head and take photo '''
         pass
+
+    # state checks
+
+    def _vehicle_is_not_active(self):
+        ''' check if vehicle is not active
+            print message and return true if not active
+            otherwise return false
+        '''
+        if self.vehicle.system_status.state != 'ACTIVE':
+            print 'vehicle must be ACTIVE\n'
+            return True
+        return False
+
+    def _vehicle_is_not_in_guided_mode(self):
+        ''' check if the vehicle is not in guided mode
+            print message and return true if not active
+            otherwise return false
+        '''
+        if self.vehicle.mode.name != 'GUIDED':
+            print 'vehicle must be in GUIDED mode\n'
+            return True
+        return False
+
 
