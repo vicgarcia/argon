@@ -189,6 +189,7 @@ class App(Cmd):
         # arm and launch the vehicle
         print 'begining launching sequence'
         print '... preflight checks and arm vehicle'
+        self.vehicle.mode = VehicleMode("GUIDED")
         if not self.vehicle.armed:
             self.vehicle.armed = True
             time.sleep(5)   # an initial 5 second pause
@@ -196,7 +197,6 @@ class App(Cmd):
                 print '... waiting on vehicle to arm'
                 time.sleep(3)
         if self.vehicle.armed:
-            self.vehicle.mode = VehicleMode("GUIDED")
             print '... liftoff and approach target altitude'
             self.vehicle.simple_takeoff(altitude)
             # verify drone reaching altitude before returning
