@@ -19,8 +19,6 @@ class App(Cmd):
             print   # handle a ctrl-C by moving to new/blank console line
             self.cmdloop()
 
-    # application startup
-
     def __init__(self, connect):
         Cmd.__init__(self)
         # clear incoming console, print intro banner
@@ -40,7 +38,7 @@ class App(Cmd):
             print '... unable to connect\n'
             sys.exit(1)
 
-    # application functionality
+    # console functionality
 
     def do_clear(self, args):
         ''' clear the console windows '''
@@ -48,9 +46,9 @@ class App(Cmd):
 
     def do_version(self, args):
         ''' print current version of argon and vehicle firmware version '''
-        print 'argon version 1.0'
-        self.vehicle.wait_ready('autopilot_version')
-        print 'vehicle firmware version {}'.format(self.vehicle.version)
+        #self.vehicle.wait_ready('autopilot_version')
+        print 'vehicle firmware : {}'.format(self.vehicle.version)
+        print 'argon console : 1.0'
         print
 
     def do_exit(self, args):
@@ -60,6 +58,7 @@ class App(Cmd):
         sys.exit(1)
 
     def do_help(self, args):
+        ''' print help text, all commands with options/details '''
         with open('help.txt', 'r') as help:
             print help.read()
 
@@ -117,7 +116,7 @@ class App(Cmd):
         ''' get or set configuration parameters from the vehicle '''
         key, value = None, None
         # check for a key value argument pair
-        args = line.split(' ')
+        args = args.split(' ')
         if len(args) == 2:
             key = args[0]
             value = args[1]
@@ -148,6 +147,26 @@ class App(Cmd):
             print 'switching to {} mode'.format(arg)
             self.vehicle.mode = modes[arg]
             print
+
+    def _vehicle_is_not_active(self):
+        ''' check if vehicle is not active
+            print message and return true if not active
+            otherwise return false
+        '''
+        if self.vehicle.system_status.state != 'ACTIVE':
+            print 'vehicle must be ACTIVE\n'
+            return True
+        return False
+
+    def _vehicle_is_not_in_guided_mode(self):
+        ''' check if the vehicle is not in guided mode
+            print message and return true if not active
+            otherwise return false
+        '''
+        if self.vehicle.mode.name != 'GUIDED':
+            print 'vehicle must be in GUIDED mode\n'
+            return True
+        return False
 
     # flight control
 
@@ -307,7 +326,7 @@ class App(Cmd):
             print '... calculate new position from parameters'
         else:
             lat, lng = (location.lat, location.lon)
-            print '... calculate new altitude'
+            print '... calculate altitude at current position'
         # issue move command
         self.vehicle.simple_goto(LocationGlobalRelative(lat, lng, alt))
         print '... position update command issued'
@@ -325,27 +344,4 @@ class App(Cmd):
     def do_photo(self, args):
         ''' rotate vehicle to --head and take photo '''
         pass
-
-    # state checks
-
-    def _vehicle_is_not_active(self):
-        ''' check if vehicle is not active
-            print message and return true if not active
-            otherwise return false
-        '''
-        if self.vehicle.system_status.state != 'ACTIVE':
-            print 'vehicle must be ACTIVE\n'
-            return True
-        return False
-
-    def _vehicle_is_not_in_guided_mode(self):
-        ''' check if the vehicle is not in guided mode
-            print message and return true if not active
-            otherwise return false
-        '''
-        if self.vehicle.mode.name != 'GUIDED':
-            print 'vehicle must be in GUIDED mode\n'
-            return True
-        return False
-
 
