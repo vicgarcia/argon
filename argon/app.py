@@ -357,10 +357,11 @@ class App(Cmd):
         self.vehicle.parameters['CIRCLE_RADIUS'] = radius * 100
         # setup circle speed (degs/second) based on radius (smaller->faster)
         if radius < 3:
-            self.vehicle.parameters['CIRCLE_RATE'] = 18
+            self.vehicle.parameters['CIRCLE_RATE'] = 12
         else:
             self.vehicle.parameters['CIRCLE_RATE'] = 6
         time.sleep(3)
+        # start circle mode loop, break on ctrl-c
         try:
             # XXX do we always need this or only in testing?
             self.vehicle.channels.overrides['3'] = 1500
@@ -374,6 +375,7 @@ class App(Cmd):
                 print
         except KeyboardInterrupt:
             print
+        # return to guided mode
         self.vehicle.mode = VehicleMode('GUIDED')
         print
 
