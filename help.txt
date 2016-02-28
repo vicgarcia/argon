@@ -50,11 +50,6 @@ move --heading=# --distance=# --altitude=#
   final position is calculated and signalled to vehicle
   vehicle will maintain current altitude if none provided
 
-circle --radius=#
-  set the vehicle to circle mode, at the provided radius
-  valid radius is between 0 and 5, default to 2
-  a radius of 0 will spin the vehicle in place
-
 return
   signal vehicle to return to home and land
   requires that the vehicle is active

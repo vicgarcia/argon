@@ -344,37 +344,3 @@ class App(Cmd):
         ''' rotate vehicle to --head and take photo '''
         pass
 
-    def do_circle(self, args):
-        ''' circle current position at --radius, 0 to rotate in place '''
-        # parse radius from args, default to 2, verify between 0 and 5, set
-        radius = argsparse.radius(args)
-        if radius is None:
-            radius = 2
-        if radius > 5 or radius < 0:
-            print 'invalid params, must provide --radius between 0 and 5\n'
-            return
-        self.vehicle.parameters['CIRCLE_RADIUS'] = radius * 100
-        # setup circle speed (degs/second) based on radius (smaller->faster)
-        if radius < 3:
-            self.vehicle.parameters['CIRCLE_RATE'] = 12
-        else:
-            self.vehicle.parameters['CIRCLE_RATE'] = 6
-        time.sleep(3)
-        # start circle mode loop, break on ctrl-c
-        try:
-            # XXX only use this when testing
-            #self.vehicle.channels.overrides['3'] = 1500
-            self.vehicle.mode = VehicleMode('CIRCLE')
-            while True:
-                self._print_telemetry()
-                print 'mode: {}'.format(self.vehicle.mode.name)
-                print
-                print 'circling (ctrl-c to break)'
-                time.sleep(5)
-                print
-        except KeyboardInterrupt:
-            print
-        # return to guided mode
-        self.vehicle.mode = VehicleMode('GUIDED')
-        print
-
