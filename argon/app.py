@@ -130,16 +130,15 @@ class App(Cmd):
         print
 
     def do_mode(self, arg):
-        ''' set vehicle mode to 'guided', 'loiter', 'manual' '''
+        ''' set vehicle mode to 'guided', 'loiter' '''
         # options as a dict, with slugs and VehicleMode object
         modes = {
-                'manual': VehicleMode('ALT_HOLD'),
                 'loiter': VehicleMode('LOITER'),
                 'guided': VehicleMode('GUIDED'),
             }
         # check that the provided arguments is an option
         if arg not in modes.keys():
-            print "must provide a mode, 'manual', 'guided', or 'loiter'\n"
+            print "must provide a mode, 'guided' or 'loiter'\n"
             return
         else:
             # update the vehicle mode

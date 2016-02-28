@@ -30,8 +30,8 @@ config <KEY> <VALUE>
   all current vehicle parameters are outputted when not
 
 mode <mode>
-  update the vehicle's mode to 'manual, 'loiter', or 'guided'
-  manual is altitude hold mode, it and loiter are for manual control
+  update the vehicle's mode to 'loiter' or 'guided'
+  loiter mode will allow the vehicle to be controlled via radio
   guided mode will allow the vehicle to recieve direction from argon
 
 launch
