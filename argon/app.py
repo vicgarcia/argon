@@ -31,11 +31,10 @@ class App(Cmd):
             self.vehicle = connect()
             print '... connected\n'
         except KeyboardInterrupt:
-            print '... cancelling connection attempt\n'
+            print '... cancelling connection attempt'
             sys.exit(1)
-        except Exception, e:
-            print e.message
-            print '... unable to connect\n'
+        except Exception:
+            print '... unable to connect'
             sys.exit(1)
 
     # console functionality
