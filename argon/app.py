@@ -362,8 +362,8 @@ class App(Cmd):
         time.sleep(3)
         # start circle mode loop, break on ctrl-c
         try:
-            # XXX do we always need this or only in testing?
-            self.vehicle.channels.overrides['3'] = 1500
+            # XXX only use this when testing
+            #self.vehicle.channels.overrides['3'] = 1500
             self.vehicle.mode = VehicleMode('CIRCLE')
             while True:
                 self._print_telemetry()
