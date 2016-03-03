@@ -1,6 +1,5 @@
-import os, sys, time, re
-from cmd import Cmd
-from LatLon import LatLon
+import os, sys, time, re, cmd
+import LatLon as latlon
 import dronekit
 
 
@@ -101,7 +100,7 @@ class argsparse(object):
         return latitude, longitude, altitude
 
 
-class App(Cmd):
+class App(cmd.Cmd):
     ''' Cmd-frameworked console application for controlling drone
         allow fine position control through command line interface
         intended to augment control of drone via radio
@@ -115,13 +114,13 @@ class App(Cmd):
 
     def cmdloop(self):
         try:
-            Cmd.cmdloop(self)
+            cmd.Cmd.cmdloop(self)
         except KeyboardInterrupt:
             print   # handle a ctrl-C by moving to new/blank console line
             self.cmdloop()
 
     def __init__(self, test=False):
-        Cmd.__init__(self)
+        cmd.Cmd.__init__(self)
         # clear incoming console, print intro banner
         os.system('clear')
         print '# argon : dronekit-based custom flight control console\n'
@@ -375,8 +374,8 @@ class App(Cmd):
             return
         else:
             # verify lat/lng provided, point is within 1000m of current
-            current = LatLon(loc.lat, loc.lon)
-            new = LatLon(lat, lng)
+            current = latlon.LatLon(loc.lat, loc.lon)
+            new = latlon.LatLon(lat, lng)
             if (current.distance(new) * 1000) > self.range_limit:
                 print 'new position is outside control range\n'
                 return
@@ -440,7 +439,7 @@ class App(Cmd):
         # calculate lat/lng position from params or use existing
         print 'update vehicle position'
         if heading and distance:
-            current = LatLon(location.lat, location.lon)
+            current = latlon.LatLon(location.lat, location.lon)
             lat, lng = self._calculate_offset(current, heading, distance)
             print '... calculate new position from parameters'
         else:
@@ -483,7 +482,7 @@ class App(Cmd):
 
 if __name__ == '__main__':
     ''' the console application can be run directly from this file
-        ./env/bin/python console.py
+        ./env/bin/python argon.py
 
         to test with SITL, use two terminal windows
 
@@ -491,7 +490,7 @@ if __name__ == '__main__':
         ./sitl.sh
 
         run the console in test mode in terminal two
-        ./env/bin/python console.py --test
+        ./env/bin/python argon.py --test
     '''
 
     # if --test flag is provided, use sitl to simulate vehicle & connect
