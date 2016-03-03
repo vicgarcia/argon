@@ -487,14 +487,12 @@ if __name__ == '__main__':
         to test with SITL, use two terminal windows
 
         run the drone simulator in terminal one
-        ./sitl.sh
+        ./env/bin/dronekit-sitl copter --home=41.9751961,-87.6636616,0,0
 
         run the console in test mode in terminal two
         ./env/bin/python argon.py --test
     '''
 
-    # if --test flag is provided, use sitl to simulate vehicle & connect
     test_flag = True if '--test' in ' '.join(sys.argv) else False
-
     App(test=test_flag).cmdloop()
 
