@@ -313,8 +313,28 @@ class App(cmd.Cmd):
             print "must provide a mode, 'guided' or 'loiter'\n"
         print
 
-    def do_yaw(self, args)
-        ''' lock and unlock the vehicle yaw '''
+    def do_yaw(self, args):
+        ''' lock yaw at --heading=X or --unlock '''
+        # check vehicle status and mode
+        if self._vehicle_is_not_active():
+            return
+        if self._vehicle_is_not_in_guided_mode():
+            return
+        # parse arguments from console
+        heading = argsparse.heading(args)
+        if heading:
+            if heading > 0 or heading < 360:
+                print 'locking vehicle yaw'
+                self.vehicle.lock_yaw(heading)
+            else:
+                print 'must provide a valid heading between 0 and 359 \n'
+        else:
+            if '--unlock' in args:
+                print 'unlocking vehicle yaw'
+                self.vehicle.reset_yaw()
+            else:
+                print 'must provide a --heading=X or --unlock parameter'
+        print
 
     def _vehicle_is_not_active(self):
         ''' check if vehicle is not active
