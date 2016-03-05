@@ -107,7 +107,7 @@ class Vehicle(dronekit.Vehicle):
         better yaw and camera trigger control methods
     '''
 
-    def lock_yaw(self, heading):
+    def lock_yaw(self, heading, direction='clock', absolute=True):
         ''' lock vehicle yaw at a specific vehicle heading '''
         msg = self.message_factory.command_long_encode(
                 0, 0,                                   # system, component
@@ -115,8 +115,8 @@ class Vehicle(dronekit.Vehicle):
                 0,                                      # confirmation
                 heading,                                # yaw in degrees
                 0,                                      # speed as deg/sec
-                1,                                      # -1 is CCW, 1 is CW
-                0,                                      # 1 is rel, 0 is abs
+                1 if direction == 'clock' else -1,      # -1 is CCW, 1 is CW
+                0 if absolute is True else 1,           # 1 is rel, 0 is abs
                 0, 0, 0                                 # unused parameters
             )
         self.send_mavlink(msg)
