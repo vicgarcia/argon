@@ -136,7 +136,7 @@ class Vehicle(dronekit.Vehicle):
             )
         self.send_mavlink(msg)
 
-    def camera_capture(self):
+    def camera_trigger(self):
         ''' trigger camera via usb cable '''
         msg = self.message_factory.command_long_encode(
                 0, 0,                                   # target system, component
@@ -564,7 +564,9 @@ class App(cmd.Cmd):
             print '... waiting on vehicle to turn'
             time.sleep(3)
         print '... capturing image'
-        time.sleep(5)
+        time.sleep(2)
+        self.vehicle.camera_trigger()
+        time.sleep(2)
         print '... reset vehicle heading control'
         self.vehicle.reset_yaw()
         print '... photo capture complete'
