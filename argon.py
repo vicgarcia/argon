@@ -459,6 +459,10 @@ class App(cmd.Cmd):
         speed = argsparse.speed(args)
         if speed is None:
             speed = self.base_speed
+        else:
+            if speed < 1 or speed > 10:
+                print 'invalid speed, must be between 1 and 10'
+                return
         # verify altitude doesn't exceed min/max, if not provided use current
         if alt is not None:
             if alt > self.max_alt:
