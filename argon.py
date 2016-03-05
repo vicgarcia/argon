@@ -131,7 +131,7 @@ class App(cmd.Cmd):
             if test == True:
                 self.vehicle = dronekit.connect('tcp:127.0.0.1:5760',
                         status_printer=self._status_printer,
-                        wait_ready=False,
+                        wait_ready=True,
                         heartbeat_timeout=self.heartbeat_timeout
                     )
             else:
