@@ -157,6 +157,7 @@ class App(cmd.Cmd):
     range_limit = 500       # 500m range
     min_alt = 3             # 3m-100m altitude envelope
     max_alt = 100
+    base_speed = 4          # 4 m/s base speed
     heartbeat_timeout = 30  # 30 second timeout
 
     def cmdloop(self):
@@ -434,6 +435,10 @@ class App(cmd.Cmd):
             if (current.distance(new) * 1000) > self.range_limit:
                 print 'new position is outside control range\n'
                 return
+        # parse speed argument, use default when not provided
+        speed = argsparse.speed(args)
+        if speed is None:
+            speed = self.base_speed
         # verify altitude doesn't exceed min/max, if not provided use current
         if alt is not None:
             if alt > self.max_alt:
@@ -446,7 +451,10 @@ class App(cmd.Cmd):
             alt = loc.alt
         # issue move command
         print 'update vehicle position'
-        self.vehicle.simple_goto(dronekit.LocationGlobalRelative(lat, lng, alt))
+        self.vehicle.simple_goto(
+                dronekit.LocationGlobalRelative(lat, lng, alt)
+                groundspeed=speed
+            )
         print '... position update command issued'
         print
 
