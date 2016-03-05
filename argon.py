@@ -305,19 +305,12 @@ class App(cmd.Cmd):
                 'guided': dronekit.VehicleMode('GUIDED'),
             }
         # check that the provided arguments is an option
-        if arg not in modes.keys():
-            print "must provide a mode, 'guided' or 'loiter'\n"
-            return
-        else:
-            # update the vehicle mode
+        if arg in modes.keys():
             print 'switching to {} mode'.format(arg)
             self.vehicle.mode = modes[arg]
-            print
-
-    def do_speed(self, arg):
-        ''' set the vehicle speed to value between 1 and 4 '''
-        # verify arg is an int, between 1 and 4
-        # assign speed to vehicle
+        else:
+            print "must provide a mode, 'guided' or 'loiter'\n"
+        print
 
     def do_yaw(self, args)
         ''' lock and unlock the vehicle yaw '''
