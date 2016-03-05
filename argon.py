@@ -101,6 +101,37 @@ class argsparse(object):
         return latitude, longitude, altitude
 
 
+class Vehicle(dronekit.Vehicle):
+    ''' extend the base dronekit vehicle to provide better
+        yaw and camera trigger control methods
+    '''
+
+    def lock_yaw(self, heading):
+        msg = self.message_factory.command_long_encode(
+                0, 0,                                   # system, component
+                mavutil.mavlink.MAV_CMD_CONDITION_YAW,  # command
+                0,                                      # confirmation
+                heading,                                # yaw in degrees
+                0,                                      # speed as deg/sec
+                1,                                      # -1 is CCW, 1 is CW
+                0,                                      # 1 is rel, 0 is abs
+                0, 0, 0                                 # unused parameters
+            )
+        self.send_mavlink(msg)
+
+    def reset_yaw(self):
+        msg = self.message_factory.command_long_encode(
+                0, 0,                                   # target system, component
+                mavutil.mavlink.MAV_CMD_DO_SET_ROI,     # command
+                0,                                      # confirmation
+                0, 0, 0, 0, 0, 0, 0                     # all params empty to reset
+            )
+        self.send_mavlink(msg)
+
+    def camera_capture(self):
+        pass
+
+
 class App(cmd.Cmd):
     ''' Cmd-frameworked console application for controlling drone
         allow fine position control through command line interface
@@ -131,6 +162,7 @@ class App(cmd.Cmd):
             print '... waiting on connection'
             if test == True:
                 self.vehicle = dronekit.connect('tcp:127.0.0.1:5760',
+                        vehicle_class=Vehicle,
                         status_printer=self._status_printer,
                         wait_ready=True,
                         heartbeat_timeout=self.heartbeat_timeout
@@ -138,6 +170,7 @@ class App(cmd.Cmd):
             else:
                 self.vehicle = dronekit.connect('/dev/cu.usbserial-DJ00DSDS',
                         baud=57600,
+                        vehicle_class=Vehicle,
                         status_printer=self._status_printer,
                         wait_ready=True,
                         heartbeat_timeout=self.heartbeat_timeout
@@ -484,30 +517,14 @@ class App(cmd.Cmd):
             heading = 0
         print 'execute photo capture'
         print '... turn vehicle to target heading'
-        turn = self.vehicle.message_factory.command_long_encode(
-                0, 0,                                   # target system, component
-                mavutil.mavlink.MAV_CMD_CONDITION_YAW,  # command
-                0,                                      # confirmation
-                heading,                                # vehicle yaw in degrees
-                0,                                      # speed as deg/sec
-                1,                                      # direction -1 is ccw, 1 is cw
-                0,                                      # deg relative (1), absolute (0)
-                0, 0, 0                                 # unused parameters
-            )
-        self.vehicle.send_mavlink(turn)
+        self.vehicle.lock_yaw(heading)
         while abs(self.vehicle.heading - heading) > 2:
             print '... waiting on vehicle to turn'
             time.sleep(3)
         print '... capturing image'
         time.sleep(5)
         print '... reset vehicle heading control'
-        reset = self.vehicle.message_factory.command_long_encode(
-                0, 0,                                   # target system, component
-                mavutil.mavlink.MAV_CMD_DO_SET_ROI,     # command
-                0,                                      # confirmation
-                0, 0, 0, 0, 0, 0, 0                     # all params empty to reset
-            )
-        self.vehicle.send_mavlink(reset)
+        self.vehicle.reset_yaw()
         print '... photo capture complete'
         print
 
