@@ -476,11 +476,17 @@ class App(cmd.Cmd):
             alt = loc.alt
         # issue move command
         print 'update vehicle position'
+        print '... issue position update command'
         self.vehicle.simple_goto(
                 dronekit.LocationGlobalRelative(lat, lng, alt),
                 groundspeed=speed
             )
-        print '... position update command issued'
+        time.sleep(7)
+        while self.vehicle.groundspeed > .02:
+            print '... waiting on vehicle to arrive'
+            time.sleep(4)
+        print '... vehicle stopped moving'
+        # validate the position here
         print
 
     def do_move(self, args):
