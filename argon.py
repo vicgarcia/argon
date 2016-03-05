@@ -148,12 +148,13 @@ class App(cmd.Cmd):
         intended to augment control of drone via radio
     '''
 
-    prompt = '# '           # console prompt character prefix
-    range_limit = 500       # 500m range
-    min_alt = 3             # 3m-100m altitude envelope
+    prompt = '# '               # console prompt character prefix
+    range_limit = 500           # 500m range
+    min_alt = 3                 # 3m-100m altitude envelope
     max_alt = 100
-    base_speed = 4          # 4 m/s base speed
-    heartbeat_timeout = 30  # 30 second timeout
+    base_speed = 4              # 4 m/s base speed
+    heartbeat_timeout = 30      # 30 second timeout
+    vehicle_class = Vehicle     # class to use for vehicle connection
 
     def cmdloop(self):
         try:
@@ -173,7 +174,7 @@ class App(cmd.Cmd):
             print '... waiting on connection'
             if test == True:
                 self.vehicle = dronekit.connect('tcp:127.0.0.1:5760',
-                        vehicle_class=Vehicle,
+                        vehicle_class=self.vehicle_class,
                         status_printer=self._status_printer,
                         wait_ready=True,
                         heartbeat_timeout=self.heartbeat_timeout
@@ -181,7 +182,7 @@ class App(cmd.Cmd):
             else:
                 self.vehicle = dronekit.connect('/dev/cu.usbserial-DJ00DSDS',
                         baud=57600,
-                        vehicle_class=Vehicle,
+                        vehicle_class=self.vehicle_class,
                         status_printer=self._status_printer,
                         wait_ready=True,
                         heartbeat_timeout=self.heartbeat_timeout
@@ -209,9 +210,9 @@ class App(cmd.Cmd):
 
     def do_version(self, args):
         ''' print current version of argon and vehicle firmware version '''
-        #self.vehicle.wait_ready('autopilot_version')
+        self.vehicle.wait_ready('autopilot_version')
+        print 'argon console : 0.2.0'
         print 'vehicle firmware : {}'.format(self.vehicle.version)
-        print 'argon console : 1.0'
         print
 
     def do_exit(self, args):
@@ -526,7 +527,7 @@ class App(cmd.Cmd):
         print 'update vehicle position'
         if heading and distance:
             current = latlon.LatLon(location.lat, location.lon)
-            lat, lng = self._calculate_offset(current, heading, distance)
+            lat, lng = self._find_position_by_offset(current, heading, distance)
             print '... calculate new position from parameters'
         else:
             lat, lng = (location.lat, location.lon)
@@ -536,9 +537,9 @@ class App(cmd.Cmd):
         print '... position update command issued'
         print
 
-    def _calculate_offset(self, position, heading, distance):
-        ''' calculate offset from position (LatLon) by heading/distance (ints)
-            heading is degrees 0-359, heading is meters
+    def _find_position_by_offset(self, position, heading, distance):
+        ''' find offset from position (LatLon) by heading/distance (ints)
+            --heading=X is degrees 0-359, --distance=X is meters
             returns lat, lng as floats in a tuple
         '''
         distance_as_km = float(distance) / 1000
