@@ -553,6 +553,9 @@ class App(cmd.Cmd):
             return
         if self._vehicle_is_not_in_guided_mode():
             return
+        if self.vehicle.groundspeed > .02:
+            print 'cannot photo capture while vehicle in motion\n'
+            return
         # parse heading, verify value, default to current heading
         heading = argsparse.heading(args)
         if heading:
