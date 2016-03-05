@@ -325,6 +325,10 @@ class App(cmd.Cmd):
                 if current_altitude >= altitude * 0.95:
                     break
                 time.sleep(3)
+            # issue a move command, allows yaw control after launch
+            location = self.vehicle.location.global_relative_frame
+            self.vehicle.simple_goto(dronekit.LocationGlobalRelative(
+                    location.lat, location.lon, location.alt))
             # success output
             print '... launch successful, loitering at {}m'.format(
                     str(self.vehicle.location.global_relative_frame.alt)
