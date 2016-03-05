@@ -135,7 +135,14 @@ class Vehicle(dronekit.Vehicle):
         self.send_mavlink(msg)
 
     def camera_capture(self):
-        pass
+        ''' trigger camera via usb cable '''
+        msg = self.message_factory.command_long_encode(
+                0, 0,                                   # target system, component
+                mavutil.mavlink.DO_DIGICAM_CONTROL,     # command
+                0,                                      # confirmation
+                0, 0, 0, 0, 0, 0, 0                     # all params empty to reset
+            )
+        self.send_mavlink(msg)
 
 
 class App(cmd.Cmd):
