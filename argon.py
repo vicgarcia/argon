@@ -24,8 +24,8 @@ class argsparse(object):
     @classmethod
     def speed(cls, line):
         ''' parse --speed argument to a float '''
-        regex = r'speed=(-?\d+.\d+)'
-        return cls._parse_arg_with_regex_to_typ(line, regex, float)
+        regex = r'speed=(\d+)'
+        return cls._parse_arg_with_regex_to_typ(line, regex, int)
 
     @classmethod
     def count(cls, line):
@@ -135,7 +135,7 @@ class Vehicle(dronekit.Vehicle):
         ''' trigger camera via usb cable '''
         msg = self.message_factory.command_long_encode(
                 0, 0,                                   # target system, component
-                mavutil.mavlink.DO_DIGICAM_CONTROL,     # command
+                mavutil.mavlink.MAV_CMD_DO_DIGICAM_CONTROL,
                 0,                                      # confirmation
                 0, 0, 0, 0, 0, 0, 0                     # all params empty to reset
             )
@@ -306,7 +306,7 @@ class App(cmd.Cmd):
             print 'switching to {} mode'.format(arg)
             self.vehicle.mode = modes[arg]
         else:
-            print "must provide a mode, 'guided' or 'loiter'\n"
+            print "must provide a mode, 'guided' or 'loiter'"
         print
 
     def do_yaw(self, args):
@@ -462,7 +462,7 @@ class App(cmd.Cmd):
             speed = self.base_speed
         else:
             if speed < 1 or speed > 10:
-                print 'invalid speed, must be between 1 and 10'
+                print 'invalid speed, must be between 1 and 10\n'
                 return
         # verify altitude doesn't exceed min/max, if not provided use current
         if alt is not None:
@@ -477,7 +477,7 @@ class App(cmd.Cmd):
         # issue move command
         print 'update vehicle position'
         self.vehicle.simple_goto(
-                dronekit.LocationGlobalRelative(lat, lng, alt)
+                dronekit.LocationGlobalRelative(lat, lng, alt),
                 groundspeed=speed
             )
         print '... position update command issued'
@@ -520,7 +520,7 @@ class App(cmd.Cmd):
                     return
             # verify distance is less than 200 m
             if distance:
-                if distance <= 1 or distance >= 200:
+                if distance < 1 or distance > 200:
                     print 'must provide a valid distance between 1 and 200 m \n'
                     return
         # calculate lat/lng position from params or use existing
@@ -570,7 +570,7 @@ class App(cmd.Cmd):
         time.sleep(2)
         self.vehicle.camera_trigger()
         time.sleep(2)
-        print '... reset vehicle heading control'
+        print '... reset vehicle heading'
         self.vehicle.reset_yaw()
         print '... photo capture complete'
         print
