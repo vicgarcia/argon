@@ -1,6 +1,7 @@
 import os, sys, time, re, cmd
 import LatLon as latlon
 import dronekit
+from pymavlink import mavutil
 
 
 class argsparse(object):
@@ -465,11 +466,12 @@ class App(cmd.Cmd):
 
     def do_photo(self, args):
         ''' rotate vehicle to --heading, default 0, and take photo '''
-        # check speed, error if moving
-        if self.vehicle.airspeed > .02:
-            print 'vehicle is in motion, cannot position camera \n '
+        # check vehicle status and mode
+        if self._vehicle_is_not_active():
             return
-        # parse heading, verify value, default to
+        if self._vehicle_is_not_in_guided_mode():
+            return
+        # parse heading, verify value, default to current heading
         heading = argsparse.heading(args)
         if heading:
             if heading <= 0 or heading >= 359:
@@ -477,11 +479,34 @@ class App(cmd.Cmd):
                 return
         else:
             heading = 0
-        '''
-        rotate vehicle to heading, wait for this to finish
-        trigger camera
-        release yaw control
-        '''
+        print 'execute photo capture'
+        print '... turn vehicle to target heading'
+        turn = self.vehicle.message_factory.command_long_encode(
+                0, 0,                                   # target system, component
+                mavutil.mavlink.MAV_CMD_CONDITION_YAW,  # command
+                0,                                      # confirmation
+                heading,                                # vehicle yaw in degrees
+                0,                                      # speed as deg/sec
+                1,                                      # direction -1 is ccw, 1 is cw
+                0,                                      # deg relative (1), absolute (0)
+                0, 0, 0                                 # unused parameters
+            )
+        self.vehicle.send_mavlink(turn)
+        while abs(self.vehicle.heading - heading) > 2:
+            print '... waiting on vehicle to turn'
+            time.sleep(3)
+        print '... capturing image'
+        time.sleep(5)
+        print '... reset vehicle heading control'
+        reset = self.vehicle.message_factory.command_long_encode(
+                0, 0,                                   # target system, component
+                mavutil.mavlink.MAV_CMD_DO_SET_ROI,     # command
+                0,                                      # confirmation
+                0, 0, 0, 0, 0, 0, 0                     # all params empty to reset
+            )
+        self.vehicle.send_mavlink(reset)
+        print '... photo capture complete'
+        print
 
 
 if __name__ == '__main__':
