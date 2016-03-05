@@ -487,10 +487,11 @@ class App(cmd.Cmd):
         while self.vehicle.groundspeed > .02:
             print '... waiting on vehicle to arrive'
             time.sleep(4)
-        print '... vehicle stopped moving'
-        # validate the position here
         # reset vehicle to base speed after position change
+        print '... reset speed to base value'
         self.vehicle.groundspeed = float(self.base_speed)
+        # validate the position here
+        print '... vehicle stopped moving'
         print
 
     def do_move(self, args):
