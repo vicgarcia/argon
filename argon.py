@@ -400,6 +400,8 @@ class App(cmd.Cmd):
             location = self.vehicle.location.global_relative_frame
             self.vehicle.simple_goto(dronekit.LocationGlobalRelative(
                     location.lat, location.lon, location.alt))
+            # set base speed
+            self.vehicle.groundspeed = float(self.base_speed)
             # success output
             print '... launch successful, loitering at {}m'.format(
                     str(self.vehicle.location.global_relative_frame.alt)
@@ -479,7 +481,7 @@ class App(cmd.Cmd):
         print '... issue position update command'
         self.vehicle.simple_goto(
                 dronekit.LocationGlobalRelative(lat, lng, alt),
-                groundspeed=speed
+                groundspeed=float(speed)
             )
         time.sleep(7)
         while self.vehicle.groundspeed > .02:
@@ -487,6 +489,8 @@ class App(cmd.Cmd):
             time.sleep(4)
         print '... vehicle stopped moving'
         # validate the position here
+        # reset vehicle to base speed after position change
+        self.vehicle.groundspeed = float(self.base_speed)
         print
 
     def do_move(self, args):
