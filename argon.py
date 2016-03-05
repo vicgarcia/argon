@@ -267,6 +267,9 @@ class App(cmd.Cmd):
         # verify arg is an int, between 1 and 4
         # assign speed to vehicle
 
+    def do_yaw(self, args)
+        ''' lock and unlock the vehicle yaw '''
+
     def _vehicle_is_not_active(self):
         ''' check if vehicle is not active
             print message and return true if not active
