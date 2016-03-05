@@ -57,12 +57,7 @@ class argsparse(object):
             verify between 0 and 359, print message + return False
         '''
         regex = r'heading=(\d+)'
-        heading = cls._parse_arg_with_regex_to_typ(line, regex, int)
-        # validate a heading (not None), print error if fails
-        if heading != None and heading <= 0 or heading >= 359:
-            print 'must provide a valid heading between 0 and 359 \n'
-            return False
-        return heading
+        return cls._parse_arg_with_regex_to_typ(line, regex, int)
 
     @classmethod
     def interval(cls, line):
@@ -323,11 +318,10 @@ class App(cmd.Cmd):
         # parse arguments from console
         heading = argsparse.heading(args)
         if heading:
-            if heading > 0 or heading < 360:
-                print 'locking vehicle yaw'
-                self.vehicle.lock_yaw(heading)
-            else:
-                print 'must provide a valid heading between 0 and 359 \n'
+            if self._heading_is_not_valid(heading):
+                return
+            print 'locking vehicle yaw'
+            self.vehicle.lock_yaw(heading)
         else:
             if '--unlock' in args:
                 print 'unlocking vehicle yaw'
@@ -335,6 +329,12 @@ class App(cmd.Cmd):
             else:
                 print 'must provide a --heading=X or --unlock parameter'
         print
+
+    def _heading_is_not_valid(self, heading):
+        if heading < 0 or heading > 359:
+            print 'must provide a valid heading between 0 and 359 \n'
+            return True
+        return False
 
     def _vehicle_is_not_active(self):
         ''' check if vehicle is not active
@@ -511,8 +511,7 @@ class App(cmd.Cmd):
         else:
             # verify heading is between 0 and 359
             if heading:
-                if heading <= 0 or heading >= 359:
-                    print 'must provide a valid heading between 0 and 359 \n'
+                if self._heading_is_not_valid(heading):
                     return
             # verify distance is less than 200 m
             if distance:
@@ -552,8 +551,7 @@ class App(cmd.Cmd):
         # parse heading, verify value, default to current heading
         heading = argsparse.heading(args)
         if heading:
-            if heading <= 0 or heading >= 359:
-                print 'must provide a valid heading between 0 and 359 \n'
+            if self._heading_is_not_valid(heading):
                 return
         else:
             heading = 0
