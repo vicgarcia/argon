@@ -9,8 +9,8 @@ class argsparse(object):
         structured to provide interface similar to a module
     '''
 
-    @staticmethod
-    def _parse_arg_with_regex_to_typ(line, regex, typ):
+    @classmethod
+    def _parse_arg_with_regex_to_typ(cls, line, regex, typ):
         ''' base functionality for argument parsing '''
         value = None
         try:
