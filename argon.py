@@ -22,6 +22,12 @@ class argsparse(object):
         return value
 
     @classmethod
+    def speed(cls, line):
+        ''' parse --speed argument to a float '''
+        regex = r'speed=(-?\d+.\d+)'
+        return cls._parse_arg_with_regex_to_typ(line, regex, float)
+
+    @classmethod
     def count(cls, line):
         ''' parse --count argument to an int '''
         regex = r'count=(\d+)'
