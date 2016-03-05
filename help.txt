@@ -1,4 +1,4 @@
-argon : available commands
+available commands
 
 help
   display this text
@@ -59,4 +59,3 @@ land
   initiate the landing sequence for the vehicle
   requires that the vehicle is active
   this will land vehicle at current position, see return
-
