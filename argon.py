@@ -183,6 +183,10 @@ class App(cmd.Cmd):
             print '... unable to connect'
             sys.exit(1)
 
+    def default(self, args):
+        print "unknown command, try 'help' for available commands"
+        print
+
     def _status_printer(self, txt):
         return
 
