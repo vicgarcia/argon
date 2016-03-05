@@ -108,11 +108,12 @@ class argsparse(object):
 
 
 class Vehicle(dronekit.Vehicle):
-    ''' extend the base dronekit vehicle to provide better
-        yaw and camera trigger control methods
+    ''' extend the base dronekit vehicle to provide
+        better yaw and camera trigger control methods
     '''
 
     def lock_yaw(self, heading):
+        ''' lock vehicle yaw at a specific vehicle heading '''
         msg = self.message_factory.command_long_encode(
                 0, 0,                                   # system, component
                 mavutil.mavlink.MAV_CMD_CONDITION_YAW,  # command
@@ -126,6 +127,7 @@ class Vehicle(dronekit.Vehicle):
         self.send_mavlink(msg)
 
     def reset_yaw(self):
+        ''' reset yaw to follow direction of vehicle travel '''
         msg = self.message_factory.command_long_encode(
                 0, 0,                                   # target system, component
                 mavutil.mavlink.MAV_CMD_DO_SET_ROI,     # command
@@ -418,7 +420,9 @@ class App(cmd.Cmd):
         print
 
     def do_position(self, args):
-        ''' move to the location provided as --lat/--lng, --alt optional '''
+        ''' move to the location provided as --lat/--lng and await arrival
+            provide option --speed=X (1-10) and --alt=X (w/in range)
+        '''
         # check vehicle status and mode
         if self._vehicle_is_not_active():
             return
@@ -428,7 +432,7 @@ class App(cmd.Cmd):
         loc = self.vehicle.location.global_relative_frame
         lat, lng, alt = argsparse.position(args)
         if lat is None or lng is None:
-            print 'invalid params, must provide --lat/--lng, --alt optional\n'
+            print 'invalid params, must provide --lat/--lng\n'
             return
         else:
             # verify lat/lng provided, point is within 1000m of current
@@ -509,7 +513,7 @@ class App(cmd.Cmd):
         print
 
     def _calculate_offset(self, position, heading, distance):
-        ''' calculate the offset from position (a LatLon) by heading/distance (ints)
+        ''' calculate offset from position (LatLon) by heading/distance (ints)
             heading is degrees 0-359, heading is meters
             returns lat, lng as floats in a tuple
         '''
