@@ -152,7 +152,8 @@ class App(cmd.Cmd):
     range_limit = 500           # 500m range
     min_alt = 3                 # 3m-100m altitude envelope
     max_alt = 100
-    base_speed = 4              # 4 m/s base speed
+    launch_alt = 5              # launch to this altitude
+    base_speed = 4.0            # 4 m/s base speed
     heartbeat_timeout = 30      # 30 second timeout
     vehicle_class = Vehicle     # class to use for vehicle connection
 
@@ -364,17 +365,6 @@ class App(cmd.Cmd):
         if self.vehicle.system_status.state == 'ACTIVE':
             print 'vehicle cannot already be ACTIVE\n'
             return
-        # verify altitude doesn't exceed min/max, if not provided default to 10 m
-        altitude = argsparse.altitude(args)
-        if altitude is not None:
-            if altitude > self.max_alt:
-                print 'altitude exceeds maximum of {}m\n'.format(self.max_alt)
-                return
-            if altitude < self.min_alt:
-                print 'altitude is below minimum of {}m\n'.format(self.max_alt)
-                return
-        else:
-            altitude = 10
         # arm and launch the vehicle
         print 'begining launching sequence'
         print '... preflight checks and arm vehicle'
@@ -387,21 +377,18 @@ class App(cmd.Cmd):
                 time.sleep(3)
         if self.vehicle.armed:
             print '... liftoff and approach target altitude'
-            self.vehicle.simple_takeoff(altitude)
+            time.sleep(5)   # run motors for five seconds, then launch
+            self.vehicle.simple_takeoff(self.launch_altitude)
             # verify drone reaching altitude before returning
-            time.sleep(2)   # an initial 3 second pause
+            time.sleep(5)   # an initial 5 second pause
             while True:
                 print '... approaching target altitude'
                 current_altitude = self.vehicle.location.global_relative_frame.alt
-                if current_altitude >= altitude * 0.95:
+                if current_altitude >= self.launch_altitude * 0.95:
                     break
                 time.sleep(3)
-            # issue a move command, allows yaw control after launch
-            location = self.vehicle.location.global_relative_frame
-            self.vehicle.simple_goto(dronekit.LocationGlobalRelative(
-                    location.lat, location.lon, location.alt))
             # set base speed
-            self.vehicle.groundspeed = float(self.base_speed)
+            self.vehicle.groundspeed = self.base_speed
             # success output
             print '... launch successful, loitering at {}m'.format(
                     str(self.vehicle.location.global_relative_frame.alt)
@@ -489,7 +476,7 @@ class App(cmd.Cmd):
             time.sleep(4)
         # reset vehicle to base speed after position change
         print '... reset speed to base value'
-        self.vehicle.groundspeed = float(self.base_speed)
+        self.vehicle.groundspeed = self.base_speed
         # validate the position here
         print '... vehicle stopped moving'
         print
@@ -581,7 +568,7 @@ class App(cmd.Cmd):
             print '... waiting on vehicle to turn'
             time.sleep(3)
         print '... capturing image'
-        time.sleep(2)
+        time.sleep(10)
         self.vehicle.camera_trigger()
         time.sleep(2)
         print '... reset vehicle heading'
