@@ -121,7 +121,7 @@ class Vehicle(dronekit.Vehicle):
             )
         self.send_mavlink(msg)
 
-    def reset_yaw(self):
+    def unlock_yaw(self):
         ''' reset yaw to follow direction of vehicle travel '''
         msg = self.message_factory.command_long_encode(
                 0, 0,                                   # target system, component
@@ -153,7 +153,7 @@ class App(cmd.Cmd):
     range_limit = 500           # 500m range
     min_alt = 3                 # 3m-100m altitude envelope
     max_alt = 100
-    launch_alt = 5              # launch to this altitude
+    launch_alt = 10             # launch to this altitude
     base_speed = 4.0            # 4 m/s base speed
     heartbeat_timeout = 30      # 30 second timeout
     vehicle_class = Vehicle     # class to use for vehicle connection
@@ -328,7 +328,7 @@ class App(cmd.Cmd):
         else:
             if '--unlock' in args:
                 print 'unlocking vehicle yaw'
-                self.vehicle.reset_yaw()
+                self.vehicle.unlock_yaw()
             else:
                 print 'must provide a --heading=X or --unlock parameter'
         print
@@ -552,7 +552,7 @@ class App(cmd.Cmd):
             return
         if self._vehicle_is_not_in_guided_mode():
             return
-        if self.vehicle.groundspeed > .02:
+        if self.vehicle.groundspeed > .2:
             print 'cannot photo capture while vehicle in motion\n'
             return
         # parse heading, verify value, default to current heading
