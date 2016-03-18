@@ -131,15 +131,16 @@ class Vehicle(dronekit.Vehicle):
             )
         self.send_mavlink(msg)
 
-    def camera_trigger(self):
-        ''' trigger camera via usb cable '''
-        msg = self.message_factory.command_long_encode(
-                0, 0,                                   # target system, component
-                mavutil.mavlink.MAV_CMD_DO_DIGICAM_CONTROL,
-                0,                                      # confirmation
-                0, 0, 0, 0, 0, 0, 0                     # all params empty to reset
-            )
-        self.send_mavlink(msg)
+    def trigger_camera(self):
+        ''' trigger camera via usb cable via signal override on ch 7 '''
+        # override on channel 7 to send signal to trigger camera
+        self.vehicle.channels.overrides[7] = 2000
+        # send signal for 1 second
+        time.sleep(1)
+        # clear override
+        self.vehicle.channels.overrides = {}
+        # block forward execution to allow time photo to be taken
+        time.sleep(4)
 
 
 class App(cmd.Cmd):
@@ -568,12 +569,18 @@ class App(cmd.Cmd):
             print '... waiting on vehicle to turn'
             time.sleep(3)
         print '... capturing image'
+        # wait on the vehicle to stabilize at new orientation
         time.sleep(10)
-        self.vehicle.camera_trigger()
-        time.sleep(2)
+        self.vehicle.trigger_camera()
         print '... reset vehicle heading'
-        self.vehicle.reset_yaw()
+        self.vehicle.unlock_yaw()
         print '... photo capture complete'
+        print
+
+    def do_trigger(self, args):
+        ''' trigger the shutter on camera to take a photograph '''
+        print 'signal vehicle for camera shutter trigger'
+        self.vehicle.trigger_camera()
         print
 
 
