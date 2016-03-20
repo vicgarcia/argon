@@ -548,7 +548,14 @@ class App(cmd.Cmd):
         lat, lng = position.offset(heading, distance_as_km).to_string('D')
         return (float(lat), float(lng))
 
-    def do_photo(self, args):
+    def do_camera(self, args):
+        ''' trigger the shutter on camera to take a photograph '''
+        print 'signal vehicle for camera trigger'
+        print '... capturing image'
+        self.vehicle.trigger_camera()
+        print
+
+    def do_capture(self, args):
         ''' rotate vehicle to --heading, default 0, and take photo '''
         # check vehicle status and mode
         if self._vehicle_is_not_active():
@@ -580,11 +587,6 @@ class App(cmd.Cmd):
         print '... photo capture complete'
         print
 
-    def do_trigger(self, args):
-        ''' trigger the shutter on camera to take a photograph '''
-        print 'signal vehicle for camera shutter trigger'
-        self.vehicle.trigger_camera()
-        print
 
 
 if __name__ == '__main__':
