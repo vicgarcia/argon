@@ -254,7 +254,7 @@ class App(cmd.Cmd):
         print 'position: {}, {}'.format(location.lat, location.lon)
         print 'altitude: {}m'.format(location.alt)
         print 'heading: {}'.format(self.vehicle.heading)
-        print 'speed: {}'.format(self.vehicle.airspeed)
+        print 'airspeed: {}'.format(self.vehicle.airspeed)
         print 'battery: {} / {:.3}'.format(
                 self.vehicle.battery.voltage,
                 self.vehicle.parameters['FS_BATT_VOLTAGE']
