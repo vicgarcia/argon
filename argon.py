@@ -135,7 +135,7 @@ class App(cmd.Cmd):
     range_limit = 500           # 500m range
     min_alt = 3                 # 3m-100m altitude envelope
     max_alt = 100
-    launch_alt = 10             # launch to this altitude
+    launch_alt = 7              # launch to this altitude
     base_speed = 4.0            # 4 m/s base speed
     heartbeat_timeout = 30      # 30 second timeout
     vehicle_class = Vehicle     # class to use for vehicle connection
@@ -355,27 +355,39 @@ class App(cmd.Cmd):
         if not self.vehicle.armed:
             self.vehicle.armed = True
             time.sleep(5)   # an initial 5 second pause
+            print '... waiting on vehicle to arm'
             while not self.vehicle.armed:
-                print '... waiting on vehicle to arm'
-                time.sleep(3)
+                time.sleep(2)
         if self.vehicle.armed:
-            print '... liftoff and approach target altitude'
+            print '... wait for motors to reach launch speed'
             time.sleep(5)   # run motors for five seconds, then launch
-            self.vehicle.simple_takeoff(self.launch_altitude)
-            # verify drone reaching altitude before returning
-            time.sleep(5)   # an initial 5 second pause
-            while True:
-                print '... approaching target altitude'
-                current_altitude = self.vehicle.location.global_relative_frame.alt
-                if current_altitude >= self.launch_altitude * 0.95:
-                    break
-                time.sleep(3)
-            # set base speed
-            self.vehicle.groundspeed = self.base_speed
-            # success output
-            print '... launch successful, loitering at {}m'.format(
-                    str(self.vehicle.location.global_relative_frame.alt)
-                )
+            try:
+                print '... liftoff and approach target altitude'
+                self.vehicle.simple_takeoff(self.launch_alt)
+                # verify drone reaching altitude before returning
+                time.sleep(5)   # an initial 5 second pause
+                while True:
+                    print '... approaching target altitude'
+                    current_altitude = \
+                        self.vehicle.location.global_relative_frame.alt
+                    if current_altitude >= self.launch_alt * 0.95:
+                        break
+                    time.sleep(5)   # wait 5 seconds between altitude checks
+                # set base speed
+                self.vehicle.groundspeed = self.base_speed
+                # success output
+                print '... launch successful, hovering at {}m'.format(
+                        str(self.vehicle.location.global_relative_frame.alt)
+                    )
+            except KeyboardInterrupt:
+                # override launch w/ ctrl-c, triggers emergency landing
+                print '\n... abort takeoff, attempt emergency landing'
+                self.vehicle.mode = dronekit.VehicleMode("LAND")
+                print '... attempting to land'
+                while True:
+                    time.sleep(3)
+                    if not self.vehicle.armed:
+                        break
         else:
             print '... an error occured while arming the vehicle'
         print
