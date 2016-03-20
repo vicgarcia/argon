@@ -587,6 +587,10 @@ class App(cmd.Cmd):
         print '... photo capture complete'
         print
 
+    def do_circle(self, args):
+        ''' fly a hex-shaped parth around a circle w/ ROI focus at a center '''
+        pass
+
 
 
 if __name__ == '__main__':
