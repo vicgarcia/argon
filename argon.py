@@ -465,7 +465,9 @@ class App(cmd.Cmd):
         print
 
     def do_move(self, args):
-        ''' move to position via --heading/--distance and/or --altitude '''
+        ''' move to position via --heading/--distance and/or --altitude
+            provide optionally --speed=X (1-10)
+        '''
         # check vehicle status and mode
         if self._vehicle_is_not_active():
             return
@@ -475,6 +477,7 @@ class App(cmd.Cmd):
         location = self.vehicle.location.global_relative_frame
         heading = argsparse.heading(args)
         distance = argsparse.distance(args)
+        speed = argsparse.speed(args)
         alt = argsparse.altitude(args)
         # verify altitude, or use current if not provided
         if alt is not None:
@@ -486,6 +489,13 @@ class App(cmd.Cmd):
                 return
         else:
             alt = location.alt
+        # verify speed, use default when not provided
+        if speed is None:
+            speed = self.base_speed
+        else:
+            if speed < 1 or speed > 10:
+                print 'invalid speed, must be between 1 and 10\n'
+                return
         # must provide heading and distance, or neither, verify values
         if (heading != None and distance == None) \
                 or (heading == None and distance != None):
@@ -514,7 +524,10 @@ class App(cmd.Cmd):
             lat, lng = (location.lat, location.lon)
             print '... calculate altitude at current position'
         # issue move command
-        self.vehicle.simple_goto(dronekit.LocationGlobalRelative(lat, lng, alt))
+        self.vehicle.simple_goto(
+                dronekit.LocationGlobalRelative(lat, lng, alt),
+                groundspeed=float(speed)
+            )
         print '... position update command issued'
         print
 
