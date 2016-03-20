@@ -387,9 +387,8 @@ class App(cmd.Cmd):
         print 'begin landing sequence'
         self.vehicle.mode = dronekit.VehicleMode("LAND")
         print '... landing command issued'
+        print '... approaching ground'
         while True:
-            print '... approaching ground'
-            current_altitude = self.vehicle.location.global_relative_frame.alt
             if not self.vehicle.armed:
                 break
             time.sleep(7)
@@ -454,12 +453,9 @@ class App(cmd.Cmd):
                 groundspeed=float(speed)
             )
         time.sleep(7)
+        print '... waiting on vehicle to arrive'
         while self.vehicle.groundspeed > .02:
-            print '... waiting on vehicle to arrive'
             time.sleep(4)
-        # reset vehicle to base speed after position change
-        print '... reset speed to base value'
-        self.vehicle.groundspeed = self.base_speed
         # validate the position here
         print '... vehicle stopped moving'
         print
@@ -560,8 +556,8 @@ class App(cmd.Cmd):
         print 'execute photo capture'
         print '... turn vehicle to target heading'
         self.vehicle.lock_yaw(heading)
+        print '... waiting on vehicle to turn'
         while abs(self.vehicle.heading - heading) > 2:
-            print '... waiting on vehicle to turn'
             time.sleep(3)
         print '... capturing image'
         # wait on the vehicle to stabilize at new orientation
