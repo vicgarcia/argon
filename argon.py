@@ -116,11 +116,11 @@ class Vehicle(dronekit.Vehicle):
     def trigger_camera(self):
         ''' trigger camera via usb cable via signal override on ch 7 '''
         # override on channel 7 to send signal to trigger camera
-        self.vehicle.channels.overrides[7] = 2000
+        self.channels.overrides[7] = 2000
         # send signal for 1 second
         time.sleep(1)
         # clear override
-        self.vehicle.channels.overrides = {}
+        self.channels.overrides = {}
         # block forward execution to allow time photo to be taken
         time.sleep(4)
 
