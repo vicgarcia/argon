@@ -28,12 +28,6 @@ class argsparse(object):
         return cls._parse_arg_with_regex_to_typ(line, regex, int)
 
     @classmethod
-    def count(cls, line):
-        ''' parse --count argument to an int '''
-        regex = r'count=(\d+)'
-        return cls._parse_arg_with_regex_to_typ(line, regex, int)
-
-    @classmethod
     def delay(cls, line):
         ''' parse --delay argument to an int '''
         regex = r'delay=(\d+)'
@@ -57,18 +51,6 @@ class argsparse(object):
             verify between 0 and 359, print message + return False
         '''
         regex = r'heading=(\d+)'
-        return cls._parse_arg_with_regex_to_typ(line, regex, int)
-
-    @classmethod
-    def interval(cls, line):
-        ''' parse --interval argument to an int '''
-        regex = r'interval=(\d+)'
-        return cls._parse_arg_with_regex_to_typ(line, regex, int)
-
-    @classmethod
-    def maximum(cls, line):
-        ''' parse --maximum argument to an int '''
-        regex = r'maximum=(\d+)'
         return cls._parse_arg_with_regex_to_typ(line, regex, int)
 
     @classmethod
