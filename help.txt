@@ -37,6 +37,7 @@ mode <mode>
 launch
   initiate the launch sequence for the vehicle
   requires that vehicle is not already active
+  during the initial launch command, CTRL-D will cancel and land
 
 position --lat=# --lng=# --alt=#
   signal vehicle to move to a lat/lng position
@@ -49,6 +50,16 @@ move --heading=# --distance=# --altitude=#
   providing only an altitude will change vehicle altitude
   final position is calculated and signalled to vehicle
   vehicle will maintain current altitude if none provided
+
+yaw --heading=# |or| --unlock
+  lock the orientation of the vehicle by rotating yaw to heading
+  use --unlock flag in place of heading to 'unlock' the yaw
+  this command will lock the vehicle's yaw until unlocked
+  while yaw is locked, vehicle will move and maintain yaw orientation
+
+camera
+  send the vehicle signal to trigger camera to capture photo
+  command enforces a wait time of 5 seconds
 
 return
   signal vehicle to return to home and land
