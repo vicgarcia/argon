@@ -135,10 +135,11 @@ class App(cmd.Cmd):
     range_limit = 500           # 500m range
     min_alt = 3                 # 3m-100m altitude envelope
     max_alt = 100
-    launch_alt = 7              # launch to this altitude
+    launch_alt = 20             # launch to this altitude
     base_speed = 4.0            # 4 m/s base speed
     heartbeat_timeout = 30      # 30 second timeout
     vehicle_class = Vehicle     # class to use for vehicle connection
+    low_battery = 11.0          # vehicle cannot arm with battery below
 
     def cmdloop(self):
         try:
