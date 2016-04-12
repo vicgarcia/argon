@@ -202,7 +202,7 @@ class App(cmd.Cmd):
 
     def do_help(self, args):
         ''' print help text, all commands with options/details '''
-        with open('help.txt', 'r') as help:
+        with open('README.md', 'r') as help:
             print help.read()
 
     # vehicle state
