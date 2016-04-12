@@ -464,12 +464,6 @@ class App(cmd.Cmd):
                 dronekit.LocationGlobalRelative(lat, lng, alt),
                 groundspeed=float(speed)
             )
-        time.sleep(7)
-        print '... waiting on vehicle to arrive'
-        while self.vehicle.groundspeed > .02:
-            time.sleep(4)
-        # validate the position here
-        print '... vehicle stopped moving'
         print
 
     def do_move(self, args):
