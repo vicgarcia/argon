@@ -216,11 +216,9 @@ class App(cmd.Cmd):
         ''' get system status from the vehicle
               system (active or standby)
               mode (guided, loiter, alt_hold, rtl, land)
-              armed (true or false)
         '''
         print 'system: {}'.format(self.vehicle.system_status.state)
         print 'mode: {}'.format(self.vehicle.mode.name)
-        print 'armed: {}'.format(self.vehicle.armed)
         print
 
     def do_telemetry(self, args):
