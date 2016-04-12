@@ -537,10 +537,6 @@ class App(cmd.Cmd):
     def do_camera(self, args):
         ''' trigger camera to capture a photo '''
         # check vehicle status and mode
-        if self._vehicle_is_not_active():
-            return
-        if self._vehicle_is_not_in_guided_mode():
-            return
         self.vehicle.trigger_camera()
         print
 
