@@ -122,7 +122,7 @@ class Vehicle(dronekit.Vehicle):
         # clear override
         self.channels.overrides = {}
         # block forward execution to allow time photo to be taken
-        time.sleep(4)
+        time.sleep(5)
 
 
 class App(cmd.Cmd):
@@ -549,42 +549,13 @@ class App(cmd.Cmd):
         return (float(lat), float(lng))
 
     def do_camera(self, args):
-        ''' trigger the shutter on camera to take a photograph '''
-        print 'signal vehicle for camera trigger'
-        print '... capturing image'
-        self.vehicle.trigger_camera()
-        print
-
-    def do_capture(self, args):
-        ''' rotate vehicle to --heading, default 0, and take photo '''
+        ''' trigger camera to capture a photo '''
         # check vehicle status and mode
         if self._vehicle_is_not_active():
             return
         if self._vehicle_is_not_in_guided_mode():
             return
-        if self.vehicle.groundspeed > .2:
-            print 'cannot photo capture while vehicle in motion\n'
-            return
-        # parse heading, verify value, default to current heading
-        heading = argsparse.heading(args)
-        if heading:
-            if self._heading_is_not_valid(heading):
-                return
-        else:
-            heading = 0
-        print 'execute photo capture'
-        print '... turn vehicle to target heading'
-        self.vehicle.lock_yaw(heading)
-        print '... waiting on vehicle to turn'
-        while abs(self.vehicle.heading - heading) > 2:
-            time.sleep(3)
-        print '... capturing image'
-        # wait on the vehicle to stabilize at new orientation
-        time.sleep(10)
         self.vehicle.trigger_camera()
-        print '... reset vehicle heading'
-        self.vehicle.unlock_yaw()
-        print '... photo capture complete'
         print
 
     def do_circle(self, args):
