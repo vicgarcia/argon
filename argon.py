@@ -54,12 +54,6 @@ class argsparse(object):
         return cls._parse_arg_with_regex_to_typ(line, regex, int)
 
     @classmethod
-    def radius(cls, line):
-        ''' parse --radius argument to an int '''
-        regex = r'radius=(\d+)'
-        return cls._parse_arg_with_regex_to_typ(line, regex, int)
-
-    @classmethod
     def latitude(cls, line):
         ''' parse --latitude argument to a float '''
         regex = r'latitude=(-?\d+.\d+)'
