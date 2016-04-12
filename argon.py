@@ -190,7 +190,7 @@ class App(cmd.Cmd):
     def do_version(self, args):
         ''' print current version of argon and vehicle firmware version '''
         self.vehicle.wait_ready('autopilot_version')
-        print 'argon console : 0.3.0'
+        print 'argon console : 0.3.1'
         print 'vehicle firmware : {}'.format(self.vehicle.version)
         print
 
