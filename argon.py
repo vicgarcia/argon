@@ -108,7 +108,9 @@ class Vehicle(dronekit.Vehicle):
         self.send_mavlink(msg)
 
     def trigger_camera(self):
-        ''' trigger camera via usb cable via signal override on ch 7 '''
+        ''' trigger camera via usb cable via signal override on ch 7
+            the handheld radio controller must be on for this to work
+        '''
         # override on channel 7 to send signal to trigger camera
         self.channels.overrides[7] = 2000
         # send signal for 1 second
@@ -116,7 +118,7 @@ class Vehicle(dronekit.Vehicle):
         # clear override
         self.channels.overrides = {}
         # block forward execution to allow time photo to be taken
-        time.sleep(5)
+        time.sleep(3)
 
 
 class App(cmd.Cmd):
