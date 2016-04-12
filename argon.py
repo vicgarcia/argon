@@ -544,9 +544,13 @@ class App(cmd.Cmd):
         self.vehicle.trigger_camera()
         print
 
-    def do_circle(self, args):
-        ''' fly a hex-shaped parth around a circle w/ ROI focus at a center '''
-        pass
+    # def do_circle(self, args):
+    #     ''' fly a hex-shaped parth around a circle w/ ROI focus at a center '''
+    #     pass
+
+    # def do_grid(self, args):
+    #     ''' demonstrate grid photo shoot at 40m, 4x4 photo grid '''
+    #     pass
 
 
 
