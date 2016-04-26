@@ -17,8 +17,8 @@ class argsparse(object):
             match = re.search(regex, line)
             if match is not None:
                 value = typ(match.group(1))
-        except Exception as error:
-            logging.error('error parsing argument : {}'.format(error.message))
+        except:
+            pass
         return value
 
     @classmethod
@@ -123,8 +123,8 @@ class App(cmd.Cmd):
     prompt = '# '               # console prompt character prefix
     range_limit = 500           # 500m range
     min_alt = 3                 # 3m-100m altitude envelope
-    max_alt = 100
-    launch_alt = 20             # launch to this altitude
+    max_alt = 121
+    launch_alt = 12             # launch to this altitude
     base_speed = 4.0            # 4 m/s base speed
     heartbeat_timeout = 30      # 30 second timeout
     vehicle_class = Vehicle     # class to use for vehicle connection
