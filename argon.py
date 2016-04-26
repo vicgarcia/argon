@@ -2,6 +2,7 @@ import os, sys, time, re, cmd
 import LatLon as latlon
 import dronekit
 from pymavlink import mavutil
+from clint.textui import puts, colored
 
 
 class argsparse(object):
@@ -134,18 +135,16 @@ class App(cmd.Cmd):
         try:
             cmd.Cmd.cmdloop(self)
         except KeyboardInterrupt:
-            print   # handle a ctrl-C by moving to new/blank console line
+            puts(newline=True)  # handle a ctrl-C by moving to new/blank console line
             self.cmdloop()
 
     def __init__(self, test=False):
         cmd.Cmd.__init__(self)
-        # clear incoming console, print intro banner
         os.system('clear')
-        print '# argon : dronekit-based custom flight control console\n'
-        # connect to drone, use connect param as function, exit if this fails
-        print 'connecting to drone'
+        puts('# argon : dronekit-based custom flight control console \n')
+        puts('connecting to drone')
         try:
-            print '... waiting on connection'
+            puts('... waiting on connection')
             if test == True:
                 self.vehicle = dronekit.connect('tcp:127.0.0.1:5760',
                         vehicle_class=self.vehicle_class,
@@ -161,17 +160,16 @@ class App(cmd.Cmd):
                         wait_ready=True,
                         heartbeat_timeout=self.heartbeat_timeout
                     )
-            print '... connected\n'
+            puts('... connected \n')
         except KeyboardInterrupt:
-            print '... cancelling connection attempt'
+            puts('... cancelling connection attempt \n')
             sys.exit(1)
         except Exception:
-            print '... unable to connect'
+            puts('... unable to connect \n')
             sys.exit(1)
 
     def default(self, args):
-        print "unknown command, try 'help' for available commands"
-        print
+        puts("unknown command, try 'help' for available commands\n")
 
     def _status_printer(self, txt):
         return
@@ -185,20 +183,18 @@ class App(cmd.Cmd):
     def do_version(self, args):
         ''' print current version of argon and vehicle firmware version '''
         self.vehicle.wait_ready('autopilot_version')
-        print 'argon console : 0.3.1'
-        print 'vehicle firmware : {}'.format(self.vehicle.version)
-        print
+        puts('argon console : 0.4.0')
 
     def do_exit(self, args):
         ''' close connection to vehicle and exit console environment '''
-        print 'closing connection\n'
+        puts('closing connection \n')
         self.vehicle.close()
         sys.exit(1)
 
     def do_help(self, args):
         ''' print help text, all commands with options/details '''
         with open('help.txt', 'r') as help:
-            print help.read()
+            puts(help.read())
 
     # vehicle state
 
@@ -207,14 +203,14 @@ class App(cmd.Cmd):
               system (active or standby)
               mode (guided, loiter, alt_hold, rtl, land)
         '''
-        print 'system: {}'.format(self.vehicle.system_status.state)
-        print 'mode: {}'.format(self.vehicle.mode.name)
-        print
+        puts('system: {}'.format(self.vehicle.system_status.state))
+        puts('mode: {}'.format(self.vehicle.mode.name))
+        puts(newline=True)
 
     def do_telemetry(self, args):
         ''' get telemetry data, once '''
         self._print_telemetry()
-        print
+        puts(newline=True)
 
     def do_monitor(self, args):
         ''' get telemetry data, continously, optional --delay '''
@@ -222,8 +218,7 @@ class App(cmd.Cmd):
         delay = argsparse.delay(args)
         # enforce minimum of 3 second delay, default to 10 seconds
         if delay is not None:
-            if delay < 3:
-                delay = 3
+            delay = delay if delay > 3 else 3
         else:
             delay = 10
         # begin monitoring loop
@@ -231,22 +226,23 @@ class App(cmd.Cmd):
             while True:
                 self._print_telemetry()
                 time.sleep(delay)
-                print
+                puts(newline=True)
         except KeyboardInterrupt:
-            print
-        print
+            puts(newline=True)
+            # nb : these uses of new lines is for ctrl-c behavior
+        puts(newline=True)
 
     def _print_telemetry(self):
         ''' print the telemetry data from vehicle to the console '''
         location = self.vehicle.location.global_relative_frame
-        print 'position: {}, {}'.format(location.lat, location.lon)
-        print 'altitude: {}m'.format(location.alt)
-        print 'heading: {}'.format(self.vehicle.heading)
-        print 'airspeed: {}'.format(self.vehicle.airspeed)
-        print 'battery: {} / {:.3}'.format(
+        puts('position: {}, {}'.format(location.lat, location.lon))
+        puts('altitude: {}m'.format(location.alt))
+        puts('heading: {}'.format(self.vehicle.heading))
+        puts('airspeed: {}'.format(self.vehicle.airspeed))
+        puts('battery: {} / {:.3}'.format(
                 self.vehicle.battery.voltage,
                 self.vehicle.parameters['FS_BATT_VOLTAGE']
-            )
+            ))
 
     def do_config(self, args):
         ''' get or set configuration parameters from the vehicle '''
@@ -259,12 +255,12 @@ class App(cmd.Cmd):
         if key and value:
             # update the parameter with provided key and value
             self.vehicle.parameters[key] = value
-            print 'updated {} with {}'.format(key, value)
+            puts('updated {} with {}'.format(key, value))
         else:
             # output all vehicle parameters with key and value
             for k, v in self.vehicle.parameters.iteritems():
-                print '{} = {}'.format(k, v)
-        print
+                puts('{} = {}'.format(k, v))
+        puts(newline=True)
 
     def do_mode(self, arg):
         ''' set vehicle mode to 'guided', 'loiter' '''
@@ -275,11 +271,11 @@ class App(cmd.Cmd):
             }
         # check that the provided arguments is an option
         if arg in modes.keys():
-            print 'switching to {} mode'.format(arg)
+            puts('switching to {} mode'.format(arg))
             self.vehicle.mode = modes[arg]
         else:
-            print "must provide a mode, 'guided' or 'loiter'"
-        print
+            puts("must provide a mode, 'guided' or 'loiter'")
+        puts(newline=True)
 
     def do_yaw(self, args):
         ''' lock yaw at --heading=X or --unlock '''
@@ -293,19 +289,19 @@ class App(cmd.Cmd):
         if heading:
             if self._heading_is_not_valid(heading):
                 return
-            print 'locking vehicle yaw'
+            puts('locking vehicle yaw')
             self.vehicle.lock_yaw(heading)
         else:
             if '--unlock' in args:
-                print 'unlocking vehicle yaw'
+                puts('unlocking vehicle yaw')
                 self.vehicle.unlock_yaw()
             else:
-                print 'must provide a --heading=X or --unlock parameter'
-        print
+                puts('must provide a --heading=X or --unlock parameter')
+        puts(newline=True)
 
     def _heading_is_not_valid(self, heading):
         if heading < 0 or heading > 359:
-            print 'must provide a valid heading between 0 and 359 \n'
+            puts(colored.red('must provide a heading between 0 and 359 \n'))
             return True
         return False
 
@@ -315,7 +311,7 @@ class App(cmd.Cmd):
             otherwise return false
         '''
         if self.vehicle.system_status.state != 'ACTIVE':
-            print 'vehicle must be ACTIVE\n'
+            puts(colored.red('vehicle must be ACTIVE \n'))
             return True
         return False
 
@@ -325,7 +321,7 @@ class App(cmd.Cmd):
             otherwise return false
         '''
         if self.vehicle.mode.name != 'GUIDED':
-            print 'vehicle must be in GUIDED mode\n'
+            puts(colored.red('vehicle must be in GUIDED mode \n'))
             return True
         return False
 
@@ -377,32 +373,30 @@ class App(cmd.Cmd):
                 print '... attempting to land'
         else:
             print '... an error occured while arming the vehicle'
-        print
+        puts(newline=True)
 
     def do_land(self, args):
         ''' set the drone to descend and land at the current location '''
         if self._vehicle_is_not_active():
             return
-        print 'begin landing sequence'
+        puts('begin landing sequence')
         self.vehicle.mode = dronekit.VehicleMode("LAND")
-        print '... landing command issued'
-        print '... approaching ground'
+        puts('... landing command issued')
+        puts('... approaching ground')
         while True:
             if not self.vehicle.armed:
                 break
             time.sleep(7)
         # success output
-        print '... landing successful, vehicle shutdown'
-        print
+        puts('... landing successful, vehicle shutdown \n')
 
     def do_return(self, args):
         ''' set the drone to RTL mode to execute automatic return/landing '''
         if self._vehicle_is_not_active():
             return
-        print 'signal vehicle for return and land'
+        puts('signal vehicle for return and land')
         self.vehicle.mode = dronekit.VehicleMode('RTL')
-        print '... RTL command issued'
-        print
+        puts('... RTL command issued \n')
 
     def do_position(self, args):
         ''' move to the location provided as --lat/--lng and await arrival
@@ -417,14 +411,14 @@ class App(cmd.Cmd):
         loc = self.vehicle.location.global_relative_frame
         lat, lng, alt = argsparse.position(args)
         if lat is None or lng is None:
-            print 'invalid params, must provide --lat/--lng\n'
+            puts('invalid params, must provide --lat/--lng \n')
             return
         else:
             # verify lat/lng provided, point is within 1000m of current
             current = latlon.LatLon(loc.lat, loc.lon)
             new = latlon.LatLon(lat, lng)
             if (current.distance(new) * 1000) > self.range_limit:
-                print 'new position is outside control range\n'
+                puts('new position is outside control range \n')
                 return
         # parse speed argument, use default when not provided
         speed = argsparse.speed(args)
@@ -432,26 +426,25 @@ class App(cmd.Cmd):
             speed = self.base_speed
         else:
             if speed < 1 or speed > 10:
-                print 'invalid speed, must be between 1 and 10\n'
+                puts('invalid speed, must be between 1 and 10 \n')
                 return
         # verify altitude doesn't exceed min/max, if not provided use current
         if alt is not None:
             if alt > self.max_alt:
-                print 'altitude exceeds maximum of {}m\n'.format(self.max_alt)
+                puts('altitude exceeds maximum of {}m \n'.format(self.max_alt))
                 return
             if alt < self.min_alt:
-                print 'altitude is below minimum of {}m\n'.format(self.max_alt)
+                puts('altitude is below minimum of {}m \n'.format(self.max_alt))
                 return
         else:
             alt = loc.alt
         # issue move command
-        print 'update vehicle position'
-        print '... issue position update command'
+        puts('update vehicle position')
+        puts('... issue position update command \n')
         self.vehicle.simple_goto(
                 dronekit.LocationGlobalRelative(lat, lng, alt),
                 groundspeed=float(speed)
             )
-        print
 
     def do_move(self, args):
         ''' move to position via --heading/--distance and/or --altitude
@@ -471,10 +464,10 @@ class App(cmd.Cmd):
         # verify altitude, or use current if not provided
         if alt is not None:
             if alt > self.max_alt:
-                print 'altitude exceeds maximum of {}m\n'.format(self.max_alt)
+                puts('altitude exceeds maximum of {}m \n'.format(self.max_alt))
                 return
             if alt < self.min_alt:
-                print 'altitude is below minimum of {}m\n'.format(self.max_alt)
+                puts('altitude is below minimum of {}m \n'.format(self.max_alt))
                 return
         else:
             alt = location.alt
@@ -483,15 +476,15 @@ class App(cmd.Cmd):
             speed = self.base_speed
         else:
             if speed < 1 or speed > 10:
-                print 'invalid speed, must be between 1 and 10\n'
+                puts('invalid speed, must be between 1 and 10 \n')
                 return
         # must provide heading and distance, or neither, verify values
         if (heading != None and distance == None) \
                 or (heading == None and distance != None):
-            print 'must provide --head/--dist together, or not at all \n'
+            puts('must provide --head/--dist together, or not at all \n')
             return
         elif (heading == None and distance == None and alt == None):
-            print 'must provide --head/--dist, and/or --alt params \n'
+            puts('must provide --head/--dist, and/or --alt params \n')
             return
         else:
             # verify heading is between 0 and 359
@@ -501,24 +494,23 @@ class App(cmd.Cmd):
             # verify distance is less than 200 m
             if distance:
                 if distance < 1 or distance > 200:
-                    print 'must provide a valid distance between 1 and 200 m \n'
+                    puts('must provide a valid distance between 1 and 200 m \n')
                     return
         # calculate lat/lng position from params or use existing
-        print 'update vehicle position'
+        puts('update vehicle position')
         if heading and distance:
             current = latlon.LatLon(location.lat, location.lon)
             lat, lng = self._find_position_by_offset(current, heading, distance)
-            print '... calculate new position from parameters'
+            puts('... calculate new position from parameters')
         else:
             lat, lng = (location.lat, location.lon)
-            print '... calculate altitude at current position'
+            puts('... calculate altitude at current position')
         # issue move command
         self.vehicle.simple_goto(
                 dronekit.LocationGlobalRelative(lat, lng, alt),
                 groundspeed=float(speed)
             )
-        print '... position update command issued'
-        print
+        puts('... position update command issued \n')
 
     def _find_position_by_offset(self, position, heading, distance):
         ''' find offset from position (LatLon) by heading/distance (ints)
@@ -533,7 +525,7 @@ class App(cmd.Cmd):
         ''' trigger camera to capture a photo '''
         # check vehicle status and mode
         self.vehicle.trigger_camera()
-        print
+        puts(newline=True)
 
     # def do_circle(self, args):
     #     ''' fly a hex-shaped parth around a circle w/ ROI focus at a center '''
