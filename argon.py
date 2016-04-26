@@ -10,7 +10,7 @@ class argsparse(object):
     '''
 
     @classmethod
-    def _parse_arg_with_regex_to_typ(cls, line, regex, typ):
+    def _arg_parse_abstract(cls, line, regex, typ):
         ''' base functionality for argument parsing '''
         value = None
         try:
@@ -24,54 +24,47 @@ class argsparse(object):
     @classmethod
     def speed(cls, line):
         ''' parse --speed argument to a float '''
-        regex = r'speed=(\d+)'
-        return cls._parse_arg_with_regex_to_typ(line, regex, int)
+        return cls._arg_parse_abstract(line, r'speed=(\d+)', int)
 
     @classmethod
     def delay(cls, line):
         ''' parse --delay argument to an int '''
-        regex = r'delay=(\d+)'
-        return cls._parse_arg_with_regex_to_typ(line, regex, int)
+        return cls._arg_parse_abstract(line, r'delay=(\d+)', int)
 
     @classmethod
     def altitude(cls, line):
         ''' parse --altitude argument to an int '''
-        regex = r'altitude=(\d+)'
-        return cls._parse_arg_with_regex_to_typ(line, regex, int)
+        return cls._arg_parse_abstract(line, r'altitude=(\d+)', int)
 
     @classmethod
     def distance(cls, line):
         ''' parse --distance argument to an int '''
-        regex = r'distance=(\d+)'
-        return cls._parse_arg_with_regex_to_typ(line, regex, int)
+        return cls._arg_parse_abstract(line, r'distance=(\d+)', int)
 
     @classmethod
     def heading(cls, line):
         ''' parse --heading argument to an int
             verify between 0 and 359, print message + return False
         '''
-        regex = r'heading=(\d+)'
-        return cls._parse_arg_with_regex_to_typ(line, regex, int)
+        return cls._arg_parse_abstract(line, r'heading=(\d+)', int)
 
     @classmethod
     def latitude(cls, line):
         ''' parse --latitude argument to a float '''
-        regex = r'latitude=(-?\d+.\d+)'
-        return cls._parse_arg_with_regex_to_typ(line, regex, float)
+        return cls._arg_parse_abstract(line, r'latitude=(-?\d+.\d+)', float)
 
     @classmethod
     def longitude(cls, line):
         ''' parse --longitude argument to a float '''
-        regex = r'longitude=(-?\d+.\d+)'
-        return cls._parse_arg_with_regex_to_typ(line, regex, float)
+        return cls._arg_parse_abstract(line, r'longitude=(-?\d+.\d+)', float)
 
     @classmethod
     def position(cls, line):
         ''' parse --lat/--lng/--alt arguments to a tuple '''
         # parse lat/lng/alt as floats, int
-        latitude = cls._parse_arg_with_regex_to_typ(line, r'lat=(-?\d+.\d+)', float)
-        longitude = cls._parse_arg_with_regex_to_typ(line, r'lng=(-?\d+.\d+)', float)
-        altitude = cls._parse_arg_with_regex_to_typ(line, r'alt=(\d+)', int)
+        latitude = cls._arg_parse_abstract(line, r'lat=(-?\d+.\d+)', float)
+        longitude = cls._arg_parse_abstract(line, r'lng=(-?\d+.\d+)', float)
+        altitude = cls._arg_parse_abstract(line, r'alt=(\d+)', int)
         # only return lat/lng as a pair, otherwise both as None
         if latitude == None or longitude == None:
             latitude, longitude = None, None
