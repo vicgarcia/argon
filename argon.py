@@ -330,28 +330,28 @@ class App(cmd.Cmd):
     def do_launch(self, args):
         ''' arm and launch drone, loiter at provided altitude parameter (meters) '''
         if self.vehicle.system_status.state == 'ACTIVE':
-            print 'vehicle cannot already be ACTIVE\n'
+            puts('vehicle cannot already be ACTIVE \n')
             return
         if not self.vehicle.is_armable:
             if self.vehicle.battery.voltage < self.low_battery:
-                print 'vehicle cannot be ARMED with low battery\n'
+                puts('vehicle cannot be ARMED with low battery \n')
             elif self.vehicle.gps_0.fix_type != 3:
-                print 'vehicle cannot be ARMED without GPS fix\n'
+                puts('vehicle cannot be ARMED without GPS fix \n')
             else:
-                print 'vehicle cannot be ARMED\n'
+                puts('vehicle cannot be ARMED \n')
             return
         # arm and launch the vehicle
-        print 'begining launching sequence'
-        print '... preflight checks'
+        puts('begining launching sequence')
+        puts('... preflight checks')
         self.vehicle.mode = dronekit.VehicleMode("GUIDED")
         if not self.vehicle.armed:
             self.vehicle.armed = True
-            print '... wait for vehicle to arm'
+            puts('... wait for vehicle to arm')
             while not self.vehicle.armed:
                 time.sleep(3)       # wait 3 seconds between armed checks
         if self.vehicle.armed:
             try:
-                print '... liftoff & approach target altitude'
+                puts('... liftoff & approach target altitude')
                 self.vehicle.simple_takeoff(self.launch_alt)
                 # verify drone reaching altitude before returning
                 while True:
@@ -363,16 +363,16 @@ class App(cmd.Cmd):
                 # set base speed
                 self.vehicle.groundspeed = self.base_speed
                 # success output
-                print '... launch successful, hovering at {}m'.format(
+                puts('... launch successful, hovering at {}m'.format(
                         str(self.vehicle.location.global_relative_frame.alt)
-                    )
+                    ))
             except KeyboardInterrupt:
                 # override launch w/ ctrl-c, triggers emergency landing
-                print '\n... abort takeoff, attempt emergency landing'
+                puts('... abort takeoff, attempt emergency landing')
                 self.vehicle.mode = dronekit.VehicleMode("LAND")
-                print '... attempting to land'
+                puts('... attempting to land')
         else:
-            print '... an error occured while arming the vehicle'
+            puts('... an error occured while arming the vehicle')
         puts(newline=True)
 
     def do_land(self, args):
