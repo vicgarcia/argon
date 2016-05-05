@@ -562,10 +562,6 @@ class App(cmd.Cmd):
         self.vehicle.trigger_camera()
         console.blank()
 
-    def do_grid(self, args):
-        ''' demonstrate grid photo shoot at 40m, 4x4 photo grid, 4:3 images '''
-        pass
-
 
 
 if __name__ == '__main__':
