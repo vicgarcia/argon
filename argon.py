@@ -372,7 +372,7 @@ class App(cmd.Cmd):
             elif self.vehicle.gps_0.fix_type != 3:
                 console.red("vehicle cannot be ARMED without GPS fix \n")
             else:
-                console.red("vehicle cannot be ARMED for undetermined reason \n")
+                console.red("vehicle cannot be ARMED \n")
             return
         # arm and launch the vehicle
         console.white('begining launching sequence')
@@ -402,6 +402,7 @@ class App(cmd.Cmd):
                     ))
             except KeyboardInterrupt:
                 # override launch w/ ctrl-c, triggers emergency landing
+                console.blank()     # blank line after the ctrl-C (^C in console)
                 console.red("... abort takeoff, attempt emergency landing")
                 self.vehicle.mode = dronekit.VehicleMode("LAND")
                 console.red("... attempting to land")
