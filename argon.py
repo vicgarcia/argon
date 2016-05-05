@@ -1,7 +1,7 @@
-import os, sys, time, re, cmd
-import LatLon as latlon
+import cmd, os, sys, re, time
 import dronekit
 from pymavlink import mavutil
+import LatLon as latlon
 from clint.textui import puts, colored
 
 
