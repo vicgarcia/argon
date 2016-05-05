@@ -137,8 +137,6 @@ class Vehicle(dronekit.Vehicle):
         time.sleep(1)
         # clear override
         self.channels.overrides = {}
-        # block forward execution to allow time photo to be taken
-        time.sleep(3)
 
 
 class App(cmd.Cmd):
@@ -560,6 +558,7 @@ class App(cmd.Cmd):
         ''' trigger camera to capture a photo '''
         # check vehicle status and mode
         self.vehicle.trigger_camera()
+        self._wait()    # wait 3 seconds for clean shot
         console.blank()
 
 
