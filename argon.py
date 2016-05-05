@@ -11,22 +11,22 @@ class console(object):
     '''
 
     @classmethod
-    def clear():
+    def clear(cls):
         ''' clear the console '''
         os.system('clear')
 
     @classmethod
-    def blank():
+    def blank(cls):
         ''' output a blank line to the console '''
         puts(newline=True)
 
     @classmethod
-    def white(text):
+    def white(cls, text):
         ''' output white text to the console '''
         puts(text)
 
     @classmethod
-    def red(text):
+    def red(cls, text):
         ''' output red text to the console '''
         puts(colored.red(text))
 
