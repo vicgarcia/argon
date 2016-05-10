@@ -154,6 +154,7 @@ class App(cmd.Cmd):
     heartbeat_timeout = 30      # 30 second timeout
     vehicle_class = Vehicle     # class to use for vehicle connection
     low_battery = 11.0          # vehicle cannot arm with battery below
+    yaw_ready = False           # is the vehicle ready for yaw control
 
     def cmdloop(self):
         try:
@@ -316,6 +317,12 @@ class App(cmd.Cmd):
             return
         if self._vehicle_is_not_in_guided_mode():
             return
+        # the vehicle yaw cannot be managed after launch until it moves
+        # this is a thing in the arducopter firmware
+        # argon tracks/guards/reports this for UX
+        if not self.yaw_ready:
+            console.red("yaw not ready, must move vehicle first")
+            return
         # parse arguments from console
         heading = argsparse.heading(args)
         if heading:
@@ -394,6 +401,8 @@ class App(cmd.Cmd):
                     self._wait()
                 # set base speed
                 self.vehicle.groundspeed = self.base_speed
+                # we are not yaw ready after launch
+                self.yaw_ready = False
                 # success output
                 console.white('... launch successful, hovering at {}m'.format(
                         str(self.vehicle.location.global_relative_frame.alt)
@@ -473,11 +482,12 @@ class App(cmd.Cmd):
             alt = loc.alt
         # issue move command
         console.white('update vehicle position')
-        console.white('... issue position update command \n')
         self.vehicle.simple_goto(
                 dronekit.LocationGlobalRelative(lat, lng, alt),
                 groundspeed=float(speed)
             )
+        self.yaw_ready = True
+        console.white('... position update command issued \n')
 
     def do_move(self, args):
         ''' move to position via --heading/--distance and/or --altitude
@@ -543,6 +553,7 @@ class App(cmd.Cmd):
                 dronekit.LocationGlobalRelative(lat, lng, alt),
                 groundspeed=float(speed)
             )
+        self.yaw_ready = True
         console.white('... position update command issued \n')
 
     def _find_position_by_offset(self, position, heading, distance):
