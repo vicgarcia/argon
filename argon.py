@@ -386,8 +386,16 @@ class App(cmd.Cmd):
         if not self.vehicle.armed:
             self.vehicle.armed = True
             console.white('... wait for vehicle to arm')
+            maximum_wait = 7
+            wait_count = 0
             while not self.vehicle.armed:
                 self._wait()
+                wait_count += 1
+                # this is mostly to handle safety switch not engaged
+                if wait_count == maximum_wait:
+                    console.white('...aborting launch \n')
+                    console.red('vehicle cannot be ARMED \n')
+                    return
         if self.vehicle.armed:
             try:
                 console.white('... liftoff & approach target altitude')
