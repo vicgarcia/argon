@@ -277,24 +277,6 @@ class App(cmd.Cmd):
                 self.vehicle.parameters['FS_BATT_VOLTAGE']
             ))
 
-    def do_config(self, args):
-        ''' get or set configuration parameters from the vehicle '''
-        key, value = None, None
-        # check for a key value argument pair
-        args = args.split(' ')
-        if len(args) == 2:
-            key = args[0]
-            value = args[1]
-        if key and value:
-            # update the parameter with provided key and value
-            self.vehicle.parameters[key] = value
-            console.white("updated {} with {}".format(key, value))
-        else:
-            # output all vehicle parameters with key and value
-            for k, v in self.vehicle.parameters.iteritems():
-                console.white("{} = {}".format(k, v))
-        console.blank()
-
     def do_mode(self, arg):
         ''' set vehicle mode to 'guided', 'loiter' '''
         # options as a dict, with slugs and VehicleMode object
