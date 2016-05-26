@@ -361,10 +361,10 @@ class App(cmd.Cmd):
         if not self.vehicle.armed:
             self.vehicle.armed = True
             console.white('... wait for vehicle to arm')
-            maximum_wait = 7
+            maximum_wait = 5 # 15 second wait time
             wait_count = 0
             while not self.vehicle.armed:
-                self._wait()
+                self._wait() # wait 3 seconds between checks, 5 checks
                 wait_count += 1
                 # this is mostly to handle safety switch not engaged
                 if wait_count == maximum_wait:
