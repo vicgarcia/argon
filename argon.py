@@ -558,6 +558,7 @@ class App(cmd.Cmd):
     def do_camera(self, args):
         ''' trigger camera to capture a photo '''
         # check vehicle status and mode
+        console.white('... capturing image')
         self.vehicle.trigger_camera()
         self._wait()    # wait 3 seconds for clean shot
         console.blank()
