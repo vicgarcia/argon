@@ -382,8 +382,6 @@ class App(cmd.Cmd):
                     if current_altitude >= self.launch_alt * 0.9:
                         break
                     self._wait()
-                # set base speed
-                self.vehicle.groundspeed = self.base_speed
                 # we are not yaw ready after launch
                 self.yaw_ready = False
                 # success output
