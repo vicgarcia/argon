@@ -246,19 +246,12 @@ class App(cmd.Cmd):
         console.blank()
 
     def do_monitor(self, args):
-        ''' get telemetry data, continously, optional --delay '''
-        # parse arguments
-        delay = argsparse.delay(args)
-        # enforce minimum of 3 second delay, default to 10 seconds
-        if delay is not None:
-            delay = delay if delay > 3 else 3
-        else:
-            delay = 10
+        ''' get telemetry data, continously every 4 seconds '''
         # begin monitoring loop
         try:
             while True:
                 self._print_telemetry()
-                self._wait(delay)
+                self._wait(4)   # hard-coded 4 second delay
                 console.blank()
         except KeyboardInterrupt:
             console.blank()
