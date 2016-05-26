@@ -485,24 +485,7 @@ class App(cmd.Cmd):
         distance = argsparse.distance(args)
         speed = argsparse.speed(args)
         alt = argsparse.altitude(args)
-        # verify altitude, or use current if not provided
-        if alt is not None:
-            if alt > self.max_alt:
-                console.white('altitude exceeds maximum of {}m \n'.format(self.max_alt))
-                return
-            if alt < self.min_alt:
-                console.white('altitude is below minimum of {}m \n'.format(self.max_alt))
-                return
-        else:
-            alt = location.alt
-        # verify speed, use default when not provided
-        if speed is None:
-            speed = self.base_speed
-        else:
-            if speed < 1 or speed > 10:
-                console.white('invalid speed, must be between 1 and 10 \n')
-                return
-        # must provide heading and distance, or neither, verify values
+        # must provide heading and distance, or neither
         if (heading != None and distance == None) \
                 or (heading == None and distance != None):
             console.white('must provide --head/--dist together, or not at all \n')
@@ -519,6 +502,23 @@ class App(cmd.Cmd):
             if distance:
                 if distance < 1 or distance > 200:
                     console.white('must provide a valid distance between 1 and 200 m \n')
+                    return
+            # verify altitude, or use current if not provided
+            if alt is not None:
+                if alt > self.max_alt:
+                    console.white('altitude exceeds maximum of {}m \n'.format(self.max_alt))
+                    return
+                if alt < self.min_alt:
+                    console.white('altitude is below minimum of {}m \n'.format(self.min_alt))
+                    return
+            else:
+                alt = location.alt
+            # verify speed, use default when not provided (ignored for alt only)
+            if speed is None:
+                speed = self.base_speed
+            else:
+                if speed < 1 or speed > 10:
+                    console.white('invalid speed, must be between 1 and 10 \n')
                     return
         # calculate lat/lng position from params or use existing
         console.white('update vehicle position')
