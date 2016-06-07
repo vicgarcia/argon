@@ -491,7 +491,7 @@ class App(cmd.Cmd):
             console.white('must provide --head/--dist together, or not at all \n')
             return
         elif (heading == None and distance == None and alt == None):
-            console.white('must provide --head/--dist, and/or --alt params \n')
+            console.white('must provide --heading/--distance, and/or --altitude params \n')
             return
         else:
             # verify heading is between 0 and 359
