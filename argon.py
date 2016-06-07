@@ -300,7 +300,7 @@ class App(cmd.Cmd):
             return
         # parse arguments from console
         heading = argsparse.heading(args)
-        if heading is None:
+        if heading is not None:
             if self._heading_is_not_valid(heading):
                 return
             console.white("locking vehicle yaw")
