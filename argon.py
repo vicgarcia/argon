@@ -537,18 +537,6 @@ class App(cmd.Cmd):
         self.yaw_ready = True
         console.white('... position update command issued \n')
 
-    def do_stop(self, args):
-        ''' stop the vehicle while in motion '''
-        # check vehicle status and mode
-        if self._vehicle_is_not_active():
-            return
-        console.white("... stopping vehicle")
-        # we stop by toggleing into loiter mode, then back to guided
-        self.vehicle.mode = dronekit.VehicleMode('LOITER')
-        self._wait(1)
-        self.vehicle.mode = dronekit.VehicleMode('GUIDED')
-        console.blank()
-
     def _find_position_by_offset(self, position, heading, distance):
         ''' find offset from position (LatLon) by heading/distance (ints)
             --heading=X is degrees 0-359, --distance=X is meters
