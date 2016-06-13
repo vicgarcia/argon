@@ -423,7 +423,7 @@ class App(cmd.Cmd):
 
     def do_position(self, args):
         ''' move to the location provided as --lat/--lng and await arrival
-            provide option --speed=X (1-10) and --alt=X (w/in range)
+            provide option --speed=X (1-8) and --alt=X (w/in range)
         '''
         # check vehicle status and mode
         if self._vehicle_is_not_active():
@@ -448,8 +448,8 @@ class App(cmd.Cmd):
         if speed is None:
             speed = self.base_speed
         else:
-            if speed < 1 or speed > 10:
-                console.white('invalid speed, must be between 1 and 10 \n')
+            if speed < 1 or speed > 8:
+                console.white('invalid speed, must be between 1 and 8 \n')
                 return
         # verify altitude doesn't exceed min/max, if not provided use current
         if alt is not None:
@@ -472,7 +472,7 @@ class App(cmd.Cmd):
 
     def do_move(self, args):
         ''' move to position via --heading/--distance and/or --altitude
-            provide optionally --speed=X (1-10)
+            provide optionally --speed=X (1-8)
         '''
         # check vehicle status and mode
         if self._vehicle_is_not_active():
@@ -517,8 +517,8 @@ class App(cmd.Cmd):
             if speed is None:
                 speed = self.base_speed
             else:
-                if speed < 1 or speed > 10:
-                    console.white('invalid speed, must be between 1 and 10 \n')
+                if speed < 1 or speed > 8:
+                    console.white('invalid speed, must be between 1 and 8 \n')
                     return
         # calculate lat/lng position from params or use existing
         console.white('update vehicle position')
