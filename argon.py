@@ -149,8 +149,8 @@ class App(cmd.Cmd):
     range_limit = 500           # 500m range
     min_alt = 3                 # 3m-120m altitude envelope
     max_alt = 120
-    launch_alt = 5              # 5m initial launch altitude
-    base_speed = 3              # 3 m/s base speed
+    launch_alt = 7              # 5m initial launch altitude
+    base_speed = 5              # 3 m/s base speed
     heartbeat_timeout = 30      # 30 second timeout
     vehicle_class = Vehicle     # class to use for vehicle connection
     low_battery = 11.0          # vehicle cannot arm with battery below
