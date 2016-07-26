@@ -481,7 +481,7 @@ class App(cmd.Cmd):
         # must provide heading and distance, or neither
         if (heading != None and distance == None) \
                 or (heading == None and distance != None):
-            console.white('must provide --head/--dist together, or not at all \n')
+            console.white('must provide --heading/--distance together, or not at all \n')
             return
         elif (heading == None and distance == None and alt == None):
             console.white('must provide --heading/--distance, and/or --altitude params \n')
@@ -493,8 +493,8 @@ class App(cmd.Cmd):
                     return
             # verify distance is less than 200 m
             if distance:
-                if distance < 1 or distance > 200:
-                    console.white('must provide a valid distance between 1 and 200 m \n')
+                if distance < 5 or distance > 200:
+                    console.white('must provide a valid distance between 5 and 200 m \n')
                     return
             # verify altitude, or use current if not provided
             if alt is not None:
