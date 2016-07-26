@@ -375,13 +375,7 @@ class App(cmd.Cmd):
             try:
                 console.white('... liftoff & approach target altitude')
                 self.vehicle.simple_takeoff(self.launch_alt)
-                # verify drone reaching altitude before returning
-                while True:
-                    current_altitude = \
-                        self.vehicle.location.global_relative_frame.alt
-                    if current_altitude >= self.launch_alt * 0.9:
-                        break
-                    self._wait()
+                self._wait(10)
                 # we are not yaw ready after launch
                 self.yaw_ready = False
                 # success output
@@ -393,7 +387,6 @@ class App(cmd.Cmd):
                 console.blank()     # blank line after the ctrl-C (^C in console)
                 console.red("... abort takeoff, attempt emergency landing")
                 self.vehicle.mode = dronekit.VehicleMode("LAND")
-                console.red("... attempting to land")
         else:
             console.red('... an error occured while arming the vehicle')
         console.blank()
