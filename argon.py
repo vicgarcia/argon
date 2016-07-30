@@ -71,7 +71,6 @@ class argsparse(object):
     @classmethod
     def heading(cls, line):
         ''' parse --heading argument to an int
-            verify between 0 and 359, print message + return False
         '''
         return cls._parse_abstract(line, r'heading=(\d+)', int)
 
@@ -314,8 +313,8 @@ class App(cmd.Cmd):
         console.blank()
 
     def _heading_is_not_valid(self, heading):
-        if heading < 0 or heading > 359:
-            console.red("must provide a heading between 0 and 359 \n")
+        if heading < 1 or heading > 360:
+            console.red("must provide a heading between 1 and 360 \n")
             return True
         return False
 
@@ -487,7 +486,7 @@ class App(cmd.Cmd):
             console.white('must provide --heading/--distance, and/or --altitude params \n')
             return
         else:
-            # verify heading is between 0 and 359
+            # verify heading is between 1 and 360
             if heading:
                 if self._heading_is_not_valid(heading):
                     return
@@ -532,7 +531,7 @@ class App(cmd.Cmd):
 
     def _find_position_by_offset(self, position, heading, distance):
         ''' find offset from position (LatLon) by heading/distance (ints)
-            --heading=X is degrees 0-359, --distance=X is meters
+            --heading=X is degrees 1-360, --distance=X is meters
             returns lat, lng as floats in a tuple
         '''
         distance_as_km = float(distance) / 1000
