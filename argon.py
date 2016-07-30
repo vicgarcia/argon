@@ -148,7 +148,7 @@ class App(cmd.Cmd):
     range_limit = 500           # 500m range
     min_alt = 3                 # 3m-120m altitude envelope
     max_alt = 120
-    launch_alt = 7              # 5m initial launch altitude
+    launch_alt = 7              # 7m initial launch altitude
     base_speed = 5              # 3 m/s base speed
     heartbeat_timeout = 30      # 30 second timeout
     vehicle_class = Vehicle     # class to use for vehicle connection
@@ -384,7 +384,7 @@ class App(cmd.Cmd):
             except KeyboardInterrupt:
                 # override launch w/ ctrl-c, triggers emergency landing
                 console.blank()     # blank line after the ctrl-C (^C in console)
-                console.red("... abort takeoff, attempt emergency landing")
+                console.red("... abort takeoff, attempt landing")
                 self.vehicle.mode = dronekit.VehicleMode("LAND")
         else:
             console.red('... an error occured while arming the vehicle')
