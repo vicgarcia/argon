@@ -178,7 +178,7 @@ class App(cmd.Cmd):
                     )
             else:
                 self.vehicle = dronekit.connect('/dev/cu.usbserial-DJ00DSDS',
-                        baud=57600,
+                        baud=38400, # 57600, 38400, 19200, 9600
                         vehicle_class=self.vehicle_class,
                         status_printer=self._status_printer,
                         wait_ready=True,
