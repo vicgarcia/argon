@@ -1,12 +1,9 @@
 Argon is a console application to control a 3D Robotics IRIS+.
 
-The goal of Argon is to get acquainted with dronekit as well as
-navigate the IRIS+ to specified coordinates and capture images.
+It allows the IRIS+ to be positioned by lat/lng for image capture.
 
-Argon uses dronekit, a python library provided by 3D Robotics.
+Refer to help.txt for Argon's full command set.
 
-Use the 'help' command in the application or refer to the help.txt
-file in this repository for Argon's full command set.
 
 The console application can be run directly ...
 
