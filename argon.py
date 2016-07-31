@@ -262,7 +262,7 @@ class App(cmd.Cmd):
         location = self.vehicle.location.global_relative_frame
         console.white("position: {}, {}".format(location.lat, location.lon))
         console.white("altitude: {}m".format(location.alt))
-        console.white("heading: {}".format(self.vehicle.heading))
+        console.white("heading: {}".format(360 if self.vehicle.heading == 0 else self.vehicle.heading))
         console.white("airspeed: {}".format(self.vehicle.airspeed))
         console.white("battery: {} / {:.3}".format(
                 self.vehicle.battery.voltage,
