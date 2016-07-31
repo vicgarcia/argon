@@ -18,16 +18,14 @@ status
 telemetry
   print vehicle telemetry data to the console
 
-monitor --delay=#
+monitor
   print vehicle telemetry data to the console in a continous loop
-  optionally provide a delay in seconds, minimum of 3, default of 10
-  --delay is the ammount of time to wait between printing the telemetry data
   the loop will continue until broken with CTRL-C
 
 mode <mode>
   update the vehicle's mode to 'loiter' or 'guided'
   loiter mode will allow the vehicle to be controlled via radio
-  guided mode will allow the vehicle to recieve direction from argon
+  guided mode will allow the vehicle to recieve direction from Argon
 
 launch
   initiate the launch sequence for the vehicle
