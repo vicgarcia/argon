@@ -237,24 +237,6 @@ class App(cmd.Cmd):
         console.blank()
 
     def do_telemetry(self, args):
-        ''' get telemetry data, once '''
-        self._print_telemetry()
-        console.blank()
-
-    def do_monitor(self, args):
-        ''' get telemetry data, continously every 4 seconds '''
-        # begin monitoring loop
-        try:
-            while True:
-                self._print_telemetry()
-                self._wait(4)   # hard-coded 4 second delay
-                console.blank()
-        except KeyboardInterrupt:
-            console.blank()
-            # nb : these uses of new lines is for ctrl-c behavior
-        console.blank()
-
-    def _print_telemetry(self):
         ''' print the telemetry data from vehicle to the console '''
         location = self.vehicle.location.global_relative_frame
         console.white("position: {}, {}".format(location.lat, location.lon))
@@ -265,6 +247,7 @@ class App(cmd.Cmd):
                 self.vehicle.battery.voltage,
                 self.vehicle.parameters['FS_BATT_VOLTAGE']
             ))
+        console.blank()
 
     def do_mode(self, arg):
         ''' set vehicle mode to 'guided', 'loiter' '''

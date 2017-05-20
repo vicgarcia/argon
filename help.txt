@@ -18,10 +18,6 @@ status
 telemetry
   print vehicle telemetry data to the console
 
-monitor
-  print vehicle telemetry data to the console in a continous loop
-  the loop will continue until broken with CTRL-C
-
 mode <mode>
   update the vehicle's mode to 'loiter' or 'guided'
   loiter mode will allow the vehicle to be controlled via radio
