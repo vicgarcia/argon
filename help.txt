@@ -4,7 +4,7 @@ help
   display this text
 
 version
-  print the argon version number
+  print the vehicle firmware version number
 
 clear
   clear console history

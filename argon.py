@@ -208,9 +208,8 @@ class App(cmd.Cmd):
         console.clear()
 
     def do_version(self, args):
-        ''' print current version of argon and vehicle firmware version '''
+        ''' print current vehicle firmware version '''
         self.vehicle.wait_ready('autopilot_version')
-        console.white("console console : 0.6.0")
         console.white("vehicle firmware : {}".format(self.vehicle.version))
         console.blank()
 
