@@ -187,19 +187,16 @@ class App(cmd.Cmd):
             console.white("... connected \n")
         except KeyboardInterrupt:
             console.white("... canceling connection attempt \n")
-            self._exit()
+            return True
         except Exception:
             console.white("... unable to connect \n")
-            self._exit()
+            return True
 
     def default(self, args):
         console.red("unknown command, try 'help' for available commands \n")
 
     def _status_printer(self, txt):
         return
-
-    def _exit(self):
-        sys.exit(1)
 
     def _wait(self, delay=3):
         time.sleep(delay)
@@ -221,7 +218,7 @@ class App(cmd.Cmd):
         ''' close connection to vehicle and exit console environment '''
         console.white("closing connection \n")
         self.vehicle.close()
-        self._exit()
+        return True
 
     def do_help(self, args):
         ''' print help text, all commands with options/details '''
