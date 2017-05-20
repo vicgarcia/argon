@@ -1,8 +1,13 @@
-import cmd, os, sys, re, time
+import cmd
+import os
+import sys
+import re
+import time
 import dronekit
-from pymavlink import mavutil
 import LatLon as latlon
+from pymavlink import mavutil
 from clint.textui import puts, colored
+
 
 
 class console(object):
