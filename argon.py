@@ -4,6 +4,7 @@ import sys
 import re
 import time
 import dronekit
+import dronekit_sitl
 import LatLon as latlon
 from pymavlink import mavutil
 from clint.textui import puts, colored
@@ -533,6 +534,19 @@ class App(cmd.Cmd):
 
 
 if __name__ == '__main__':
-    test_flag = True if '--test' in ' '.join(sys.argv) else False
-    App(test=test_flag).cmdloop()
+
+    # check for the --test flag from the command line
+    test = True if '--test' in ' '.join(sys.argv) else False
+
+    # if running in test mode, start the simulator in another process
+    if test:
+        sitl = dronekit_sitl.start_default(lat=41.9751961, lon=-87.6636616)
+
+    # enter the console application
+    app = App(test=test)
+    app.cmdloop()
+
+    # if running in test mode, end the simulator before finishing
+    if test:
+        sitl.stop()
 
