@@ -139,8 +139,6 @@ class App(cmd.Cmd):
     prompt = '# '               # console prompt character prefix
     speed = 5.0                 # vehicle speed as a float
     range_limit = 500           # 500m range
-    min_alt = 3                 # 3m-120m altitude envelope
-    max_alt = 120
     launch_alt = 7              # 7m initial launch altitude
     heartbeat_timeout = 30      # 30 second timeout
     vehicle_class = Vehicle     # class to use for vehicle connection
@@ -404,13 +402,13 @@ class App(cmd.Cmd):
             if (current.distance(new) * 1000) > self.range_limit:
                 console.white('new position is outside control range \n')
                 return
-        # verify altitude doesn't exceed min/max, if not provided use current
+        # verify altitude, use current if not provided
         if alt is not None:
-            if alt > self.max_alt:
-                console.white('altitude exceeds maximum of {}m \n'.format(self.max_alt))
+            if alt > 120:
+                console.white('altitude exceeds maximum of 120m \n')
                 return
-            if alt < self.min_alt:
-                console.white('altitude is below minimum of {}m \n'.format(self.max_alt))
+            if alt < 4:
+                console.white('altitude is below minimum of 4m \n')
                 return
         else:
             alt = loc.alt
@@ -453,13 +451,13 @@ class App(cmd.Cmd):
                 if distance < 5 or distance > 200:
                     console.white('must provide a valid distance between 5 and 200 m \n')
                     return
-            # verify altitude, or use current if not provided
+            # verify altitude, use current if not provided
             if alt is not None:
-                if alt > self.max_alt:
-                    console.white('altitude exceeds maximum of {}m \n'.format(self.max_alt))
+                if alt > 120:
+                    console.white('altitude exceeds maximum of 120m \n')
                     return
-                if alt < self.min_alt:
-                    console.white('altitude is below minimum of {}m \n'.format(self.min_alt))
+                if alt < 4:
+                    console.white('altitude is below minimum of 4m \n')
                     return
             else:
                 alt = location.alt
