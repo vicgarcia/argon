@@ -67,8 +67,7 @@ class argsparse(object):
 
     @classmethod
     def heading(cls, line):
-        ''' parse --heading argument to an int
-        '''
+        ''' parse --heading argument to an int '''
         return cls._parse_abstract(line, r'heading=(\d+)', int)
 
     @classmethod
