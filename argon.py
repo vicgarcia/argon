@@ -138,7 +138,6 @@ class App(cmd.Cmd):
     prompt = '# '               # console prompt character prefix
     speed = 5.0                 # vehicle speed as a float
     range_limit = 500           # 500m range
-    heartbeat_timeout = 30      # 30 second timeout
     vehicle_class = Vehicle     # class to use for vehicle connection
     low_battery = 11.0          # vehicle cannot arm with battery below
     yaw_ready = False           # is the vehicle ready for yaw control
@@ -162,7 +161,7 @@ class App(cmd.Cmd):
                         vehicle_class=self.vehicle_class,
                         status_printer=self._status_printer,
                         wait_ready=True,
-                        heartbeat_timeout=self.heartbeat_timeout
+                        heartbeat_timeout=30,   # 30 second timeout
                     )
             else:
                 self.vehicle = dronekit.connect('/dev/cu.usbserial-DJ00DSDS',
@@ -170,7 +169,7 @@ class App(cmd.Cmd):
                         vehicle_class=self.vehicle_class,
                         status_printer=self._status_printer,
                         wait_ready=True,
-                        heartbeat_timeout=self.heartbeat_timeout
+                        heartbeat_timeout=30,   # 30 second timeout
                     )
             console.white("... connected \n")
         except KeyboardInterrupt:
