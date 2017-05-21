@@ -51,11 +51,6 @@ class argsparse(object):
         return value
 
     @classmethod
-    def speed(cls, line):
-        ''' parse --speed argument to a float '''
-        return cls._parse_abstract(line, r'speed=(\d+)', int)
-
-    @classmethod
     def delay(cls, line):
         ''' parse --delay argument to an int '''
         return cls._parse_abstract(line, r'delay=(\d+)', int)
@@ -142,11 +137,11 @@ class Vehicle(dronekit.Vehicle):
 
 class App(cmd.Cmd):
     prompt = '# '               # console prompt character prefix
+    speed = 5.0                 # vehicle speed as a float
     range_limit = 500           # 500m range
     min_alt = 3                 # 3m-120m altitude envelope
     max_alt = 120
     launch_alt = 7              # 7m initial launch altitude
-    base_speed = 5              # 3 m/s base speed
     heartbeat_timeout = 30      # 30 second timeout
     vehicle_class = Vehicle     # class to use for vehicle connection
     low_battery = 11.0          # vehicle cannot arm with battery below
@@ -390,9 +385,7 @@ class App(cmd.Cmd):
         console.white('... RTL command issued \n')
 
     def do_position(self, args):
-        ''' move to the location provided as --lat/--lng and await arrival
-            provide option --speed=X (1-8) and --alt=X (w/in range)
-        '''
+        ''' move to the location provided as --lat/--lng with optional --alt '''
         # check vehicle status and mode
         if self._vehicle_is_not_active():
             return
@@ -411,14 +404,6 @@ class App(cmd.Cmd):
             if (current.distance(new) * 1000) > self.range_limit:
                 console.white('new position is outside control range \n')
                 return
-        # parse speed argument, use default when not provided
-        speed = argsparse.speed(args)
-        if speed is None:
-            speed = self.base_speed
-        else:
-            if speed < 1 or speed > 8:
-                console.white('invalid speed, must be between 1 and 8 \n')
-                return
         # verify altitude doesn't exceed min/max, if not provided use current
         if alt is not None:
             if alt > self.max_alt:
@@ -433,15 +418,13 @@ class App(cmd.Cmd):
         console.white('update vehicle position')
         self.vehicle.simple_goto(
                 dronekit.LocationGlobalRelative(lat, lng, alt),
-                groundspeed=float(speed)
+                groundspeed=self.speed
             )
         self.yaw_ready = True
         console.white('... position update command issued \n')
 
     def do_move(self, args):
-        ''' move to position via --heading/--distance and/or --altitude
-            provide optionally --speed=X (1-8)
-        '''
+        ''' move to position via --heading/--distance and/or --altitude '''
         # check vehicle status and mode
         if self._vehicle_is_not_active():
             return
@@ -451,7 +434,6 @@ class App(cmd.Cmd):
         location = self.vehicle.location.global_relative_frame
         heading = argsparse.heading(args)
         distance = argsparse.distance(args)
-        speed = argsparse.speed(args)
         alt = argsparse.altitude(args)
         # must provide heading and distance, or neither
         if (heading != None and distance == None) \
@@ -481,13 +463,6 @@ class App(cmd.Cmd):
                     return
             else:
                 alt = location.alt
-            # verify speed, use default when not provided (ignored for alt only)
-            if speed is None:
-                speed = self.base_speed
-            else:
-                if speed < 1 or speed > 8:
-                    console.white('invalid speed, must be between 1 and 8 \n')
-                    return
         # calculate lat/lng position from params or use existing
         console.white('update vehicle position')
         if heading and distance:
@@ -500,7 +475,7 @@ class App(cmd.Cmd):
         # issue move command
         self.vehicle.simple_goto(
                 dronekit.LocationGlobalRelative(lat, lng, alt),
-                groundspeed=float(speed)
+                groundspeed=self.speed
             )
         self.yaw_ready = True
         console.white('... position update command issued \n')
