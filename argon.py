@@ -138,7 +138,6 @@ class App(cmd.Cmd):
     prompt = '# '               # console prompt character prefix
     speed = 5.0                 # vehicle speed as a float
     range_limit = 500           # 500m range
-    launch_alt = 7              # 7m initial launch altitude
     heartbeat_timeout = 30      # 30 second timeout
     vehicle_class = Vehicle     # class to use for vehicle connection
     low_battery = 11.0          # vehicle cannot arm with battery below
@@ -341,7 +340,7 @@ class App(cmd.Cmd):
         if self.vehicle.armed:
             try:
                 console.white('... liftoff & approach target altitude')
-                self.vehicle.simple_takeoff(self.launch_alt)
+                self.vehicle.simple_takeoff(7)
                 self._wait(10)
                 # we are not yaw ready after launch
                 self.yaw_ready = False
