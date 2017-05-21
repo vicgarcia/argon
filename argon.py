@@ -12,9 +12,7 @@ from clint.textui import puts, colored
 
 
 class console(object):
-    ''' methods for console output using clint components
-        structured to provide interface similar to a module
-    '''
+    ''' methods for console output using clint components '''
 
     @classmethod
     def clear(cls):
@@ -38,9 +36,7 @@ class console(object):
 
 
 class argsparse(object):
-    ''' methods for parsing arguments from Cmd app console line args
-        structured to provide interface similar to a module
-    '''
+    ''' methods for parsing arguments from Cmd app console line args '''
 
     @classmethod
     def _parse_abstract(cls, line, regex, typ):
@@ -145,11 +141,6 @@ class Vehicle(dronekit.Vehicle):
 
 
 class App(cmd.Cmd):
-    ''' Cmd-frameworked console application for controlling drone
-        allow fine position control through command line interface
-        intended to augment control of drone via radio
-    '''
-
     prompt = '# '               # console prompt character prefix
     range_limit = 500           # 500m range
     min_alt = 3                 # 3m-120m altitude envelope
