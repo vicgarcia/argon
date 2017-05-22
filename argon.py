@@ -317,8 +317,7 @@ class App(cmd.Cmd):
                 wait_count += 1
                 # this is mostly to handle safety switch not engaged
                 if wait_count == maximum_wait:
-                    console.white('...aborting launch \n')
-                    console.red('vehicle cannot be ARMED \n')
+                    console.white('... vehicle cannot be armed \n')
                     return
         if self.vehicle.armed:
             try:
@@ -374,20 +373,20 @@ class App(cmd.Cmd):
         # parse & verify target latitude/longitude
         latitude, longitude = argsparse.position(args)
         if latitude is None or longitude is None:
-            console.white('invalid params, must provide --lat/--lng \n')
+            console.red('invalid params, must provide --lat/--lng \n')
             return
         else:
             # verify latitude/longitude provided is within 300m of current
             current = latlon.LatLon(location.lat, location.lon)
             new = latlon.LatLon(latitude, longitude)
             if (current.distance(new) * 1000) > 300:
-                console.white('new position is outside control range \n')
+                console.red('new position is outside control range \n')
                 return
         # parse & verify target altitude, use current if not provided
         altitude = argsparse.altitude(args)
         if altitude is not None:
             if altitude < 4 or altitude > 120:
-                console.white('must provide a valid altitude between 5m and 120m \n')
+                console.red('must provide a valid altitude between 5m and 120m \n')
                 return
         else:
             altitude = location.alt
@@ -415,10 +414,10 @@ class App(cmd.Cmd):
         # verify provided parameters
         if (heading != None and distance == None) \
                 or (heading == None and distance != None):
-            console.white('must provide --head/--dist together, or not at all \n')
+            console.red('must provide --head/--dist together, or not at all \n')
             return
         elif (heading == None and distance == None and altitude == None):
-            console.white('must provide --head/--dist, and/or --alt params \n')
+            console.red('must provide --head/--dist, and/or --alt params \n')
             return
         else:
             # verify heading is between 1 and 360
@@ -428,12 +427,12 @@ class App(cmd.Cmd):
             # verify distance is greater than 5m and less than 200m
             if distance:
                 if distance < 5 or distance > 200:
-                    console.white('must provide a valid distance between 5m and 200m \n')
+                    console.red('must provide a valid distance between 5m and 200m \n')
                     return
             # verify altitude is between 4m and 120m, use current if not provided
             if altitude is not None:
                 if altitude < 4 or altitude > 120:
-                    console.white('must provide a valid altitude between 5m and 120m \n')
+                    console.red('must provide a valid altitude between 5m and 120m \n')
                     return
             else:
                 altitude = location.alt
