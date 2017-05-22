@@ -51,34 +51,19 @@ class argsparse(object):
         return value
 
     @classmethod
-    def delay(cls, line):
-        ''' parse --delay argument to an int '''
-        return cls._parse_abstract(line, r'delay=(\d+)', int)
-
-    @classmethod
     def altitude(cls, line):
-        ''' parse --altitude argument to an int '''
-        return cls._parse_abstract(line, r'altitude=(\d+)', int)
+        ''' parse --alt argument to an int '''
+        return cls._parse_abstract(line, r'alt=(\d+)', int)
 
     @classmethod
     def distance(cls, line):
-        ''' parse --distance argument to an int '''
-        return cls._parse_abstract(line, r'distance=(\d+)', int)
+        ''' parse --dist argument to an int '''
+        return cls._parse_abstract(line, r'dist=(\d+)', int)
 
     @classmethod
     def heading(cls, line):
-        ''' parse --heading argument to an int '''
-        return cls._parse_abstract(line, r'heading=(\d+)', int)
-
-    @classmethod
-    def latitude(cls, line):
-        ''' parse --latitude argument to a float '''
-        return cls._parse_abstract(line, r'latitude=(-?\d+.\d+)', float)
-
-    @classmethod
-    def longitude(cls, line):
-        ''' parse --longitude argument to a float '''
-        return cls._parse_abstract(line, r'longitude=(-?\d+.\d+)', float)
+        ''' parse --head argument to an int '''
+        return cls._parse_abstract(line, r'head=(\d+)', int)
 
     @classmethod
     def position(cls, line):
