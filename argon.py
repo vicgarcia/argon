@@ -370,33 +370,31 @@ class App(cmd.Cmd):
             return
         if self._vehicle_is_not_in_guided_mode():
             return
-        # parse arguments and verify lat/lng, handle alt as optional
-        loc = self.vehicle.location.global_relative_frame
-        lat, lng, alt = argsparse.position(args)
-        if lat is None or lng is None:
+        location = self.vehicle.location.global_relative_frame
+        # parse & verify target latitude/longitude
+        latitude, longitude = argsparse.position(args)
+        if latitude is None or longitude is None:
             console.white('invalid params, must provide --lat/--lng \n')
             return
         else:
-            # verify lat/lng provided, point is within 1000m of current
-            current = latlon.LatLon(loc.lat, loc.lon)
-            new = latlon.LatLon(lat, lng)
-            if (current.distance(new) * 1000) > self.range_limit:
+            # verify latitude/longitude provided is within 300m of current
+            current = latlon.LatLon(location.lat, location.lon)
+            new = latlon.LatLon(latitude, longitude)
+            if (current.distance(new) * 1000) > 300:
                 console.white('new position is outside control range \n')
                 return
-        # verify altitude, use current if not provided
-        if alt is not None:
-            if alt > 120:
-                console.white('altitude exceeds maximum of 120m \n')
-                return
-            if alt < 4:
-                console.white('altitude is below minimum of 4m \n')
+        # parse & verify target altitude, use current if not provided
+        altitude = argsparse.altitude(args)
+        if altitude is not None:
+            if altitude < 4 or altitude > 120:
+                console.white('must provide a valid altitude between 5m and 120m \n')
                 return
         else:
-            alt = loc.alt
+            altitude = location.alt
         # issue move command
         console.white('update vehicle position')
         self.vehicle.simple_goto(
-                dronekit.LocationGlobalRelative(lat, lng, alt),
+                dronekit.LocationGlobalRelative(latitude, longitude, altitude),
                 groundspeed=self.speed
             )
         self.yaw_ready = True
