@@ -67,15 +67,14 @@ class argsparse(object):
 
     @classmethod
     def position(cls, line):
-        ''' parse --lat/--lng/--alt arguments to a tuple '''
+        ''' parse --lat/--lng arguments to a tuple '''
         # parse lat/lng/alt as floats, int
         latitude = cls._parse_abstract(line, r'lat=(-?\d+.\d+)', float)
         longitude = cls._parse_abstract(line, r'lng=(-?\d+.\d+)', float)
-        altitude = cls._parse_abstract(line, r'alt=(\d+)', int)
         # only return lat/lng as a pair, otherwise both as None
         if latitude == None or longitude == None:
             latitude, longitude = None, None
-        return latitude, longitude, altitude
+        return latitude, longitude
 
 
 class Vehicle(dronekit.Vehicle):
