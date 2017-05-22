@@ -33,7 +33,7 @@ position --lat=# --lng=# --alt=#
   optionally priovide an altitude to use at final position
   vehicle will maintain current altitude if none provided
 
-move --heading=# --distance=# --altitude=#
+move --head=# --dist=# --alt=#
   signal vehicle to move a distance, along a heading, to an altitude
   must provide head/dist together, optionally provide altitude
   providing only an altitude will change vehicle altitude

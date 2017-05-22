@@ -403,57 +403,53 @@ class App(cmd.Cmd):
         console.white('... position update command issued \n')
 
     def do_move(self, args):
-        ''' move to position via --heading/--distance and/or --altitude '''
+        ''' move to position via --head/--dist and/or --alt '''
         # check vehicle status and mode
         if self._vehicle_is_not_active():
             return
         if self._vehicle_is_not_in_guided_mode():
             return
-        # parse arguments from console
         location = self.vehicle.location.global_relative_frame
+        # parse arguments from console
         heading = argsparse.heading(args)
         distance = argsparse.distance(args)
-        alt = argsparse.altitude(args)
-        # must provide heading and distance, or neither
+        altitude = argsparse.altitude(args)
+        # verify provided parameters
         if (heading != None and distance == None) \
                 or (heading == None and distance != None):
-            console.white('must provide --heading/--distance together, or not at all \n')
+            console.white('must provide --head/--dist together, or not at all \n')
             return
-        elif (heading == None and distance == None and alt == None):
-            console.white('must provide --heading/--distance, and/or --altitude params \n')
+        elif (heading == None and distance == None and altitude == None):
+            console.white('must provide --head/--dist, and/or --alt params \n')
             return
         else:
             # verify heading is between 1 and 360
             if heading:
                 if self._heading_is_not_valid(heading):
                     return
-            # verify distance is less than 200 m
+            # verify distance is greater than 5m and less than 200m
             if distance:
                 if distance < 5 or distance > 200:
-                    console.white('must provide a valid distance between 5 and 200 m \n')
+                    console.white('must provide a valid distance between 5m and 200m \n')
                     return
-            # verify altitude, use current if not provided
-            if alt is not None:
-                if alt > 120:
-                    console.white('altitude exceeds maximum of 120m \n')
-                    return
-                if alt < 4:
-                    console.white('altitude is below minimum of 4m \n')
+            # verify altitude is between 4m and 120m, use current if not provided
+            if altitude is not None:
+                if altitude < 4 or altitude > 120:
+                    console.white('must provide a valid altitude between 5m and 120m \n')
                     return
             else:
-                alt = location.alt
-        # calculate lat/lng position from params or use existing
+                altitude = location.alt
+        # calculate latitude/longitude position from params or use existing
         console.white('update vehicle position')
         if heading and distance:
-            current = latlon.LatLon(location.lat, location.lon)
-            lat, lng = self._find_position_by_offset(current, heading, distance)
             console.white('... calculate new position from parameters')
+            current = latlon.LatLon(location.lat, location.lon)
+            latitude, longitude = self._find_position_by_offset(current, heading, distance)
         else:
-            lat, lng = (location.lat, location.lon)
-            console.white('... calculate altitude at current position')
+            latitude, longitude = (location.lat, location.lon)
         # issue move command
         self.vehicle.simple_goto(
-                dronekit.LocationGlobalRelative(lat, lng, alt),
+                dronekit.LocationGlobalRelative(latitude, longitude, altitude),
                 groundspeed=self.speed
             )
         self.yaw_ready = True
