@@ -235,7 +235,7 @@ class App(cmd.Cmd):
         console.blank()
 
     def do_yaw(self, args):
-        ''' lock yaw at --heading=X or --unlock '''
+        ''' lock yaw at --head=X or --unlock '''
         # check vehicle status and mode
         if self._vehicle_is_not_active():
             return
@@ -259,7 +259,7 @@ class App(cmd.Cmd):
                 console.white("unlocking vehicle yaw")
                 self.vehicle.unlock_yaw()
             else:
-                console.white("must provide a --heading=X or --unlock parameter")
+                console.white("must provide a --head=X or --unlock parameter")
         console.blank()
 
     def _heading_is_not_valid(self, heading):
