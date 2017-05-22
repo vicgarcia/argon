@@ -136,7 +136,7 @@ class App(cmd.Cmd):
     def __init__(self, test=False):
         cmd.Cmd.__init__(self)
         console.clear()
-        console.white("# argon : dronekit-based custom flight control console \n")
+        console.white("# argon : dronekit-based flight control console \n")
         console.white("connecting to drone")
         try:
             console.white("... waiting on connection")
