@@ -166,6 +166,10 @@ class App(cmd.Cmd):
     def default(self, args):
         console.red("unknown command, try 'help' for available commands \n")
 
+    def emptyline(self):
+        console.blank()
+        pass
+
     def _status_printer(self, txt):
         return
 
