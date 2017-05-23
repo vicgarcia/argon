@@ -1,10 +1,6 @@
-import cmd
-import os
-import sys
-import re
-import time
-import dronekit
-import dronekit_sitl
+import cmd, re, time
+import os, sys
+import dronekit, dronekit_sitl
 import LatLon as latlon
 from pymavlink import mavutil
 from clint.textui import puts, colored
