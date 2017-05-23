@@ -1,8 +1,8 @@
 import cmd, re, time
 import os, sys
 import dronekit, dronekit_sitl
-import LatLon as latlon
 from pymavlink import mavutil
+import LatLon as latlon
 from clint.textui import puts, colored
 
 
@@ -377,8 +377,8 @@ class App(cmd.Cmd):
             return
         else:
             # verify latitude/longitude provided is within 300m of current
-            current = latlon.LatLon(location.lat, location.lon)
-            new = latlon.LatLon(latitude, longitude)
+            current = LatLon(location.lat, location.lon)
+            new = LatLon(latitude, longitude)
             if (current.distance(new) * 1000) > 300:
                 console.red('new position is outside control range \n')
                 return
@@ -440,7 +440,7 @@ class App(cmd.Cmd):
         console.white('update vehicle position')
         if heading and distance:
             console.white('... calculate new position from parameters')
-            current = latlon.LatLon(location.lat, location.lon)
+            current = LatLon(location.lat, location.lon)
             latitude, longitude = self._find_position_by_offset(current, heading, distance)
         else:
             latitude, longitude = (location.lat, location.lon)
