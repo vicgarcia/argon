@@ -291,7 +291,7 @@ class App(cmd.Cmd):
         # issue launch command
         if self.vehicle.armed:
             altitude = 7
-            self.vehicle.simple_takeoff(launch_alt)
+            self.vehicle.simple_takeoff(altitude)
             console.white('... liftoff & approach target altitude')
             # wait for drone to reach launch altitude
             while True:
