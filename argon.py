@@ -117,7 +117,7 @@ class Vehicle(dronekit.Vehicle):
 class App(cmd.Cmd):
     prompt = '# '               # console prompt character prefix
     speed = 5.0                 # vehicle speed as a float
-    range_limit = 500           # 500m range
+    range = 200                 # max position movement range
     vehicle_class = Vehicle     # class to use for vehicle connection
     yaw_ready = False           # is the vehicle ready for yaw control
 
@@ -376,7 +376,7 @@ class App(cmd.Cmd):
             # verify latitude/longitude provided is within 300m of current
             current = LatLon(location.lat, location.lon)
             new = LatLon(latitude, longitude)
-            if (current.distance(new) * 1000) > 300:
+            if (current.distance(new) * 1000) > self.range:
                 console.red('new position is outside control range \n')
                 return
         # parse & verify target altitude, use current if not provided
