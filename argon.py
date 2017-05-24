@@ -119,7 +119,6 @@ class App(cmd.Cmd):
     speed = 5.0                 # vehicle speed as a float
     range_limit = 500           # 500m range
     vehicle_class = Vehicle     # class to use for vehicle connection
-    low_battery = 11.0          # vehicle cannot arm with battery below
     yaw_ready = False           # is the vehicle ready for yaw control
 
     def cmdloop(self):
@@ -296,7 +295,7 @@ class App(cmd.Cmd):
             console.red("vehicle is already ACTIVE \n")
             return
         if not self.vehicle.is_armable:
-            if self.vehicle.battery.voltage < self.low_battery:
+            if self.vehicle.battery.voltage < 11.0:
                 console.red("vehicle cannot be ARMED with low battery \n")
             elif self.vehicle.gps_0.fix_type != 3:
                 console.red("vehicle cannot be ARMED without GPS fix \n")
@@ -304,53 +303,51 @@ class App(cmd.Cmd):
                 console.red("vehicle cannot be ARMED \n")
             return
         # arm and launch the vehicle
-        console.white('begining launching sequence')
+        console.white('begin launch sequence')
         console.white('... preflight checks')
         self.vehicle.mode = dronekit.VehicleMode("GUIDED")
         if not self.vehicle.armed:
             self.vehicle.armed = True
             console.white('... wait for vehicle to arm')
-            maximum_wait = 5 # 15 second wait time
+            # wait for the vehicle to arm (15 seconds max)
             wait_count = 0
             while not self.vehicle.armed:
-                self._wait() # wait 3 seconds between checks, 5 checks
+                self._wait()
                 wait_count += 1
-                # this is mostly to handle safety switch not engaged
-                if wait_count == maximum_wait:
+                if wait_count == 5:
                     console.white('... vehicle cannot be armed \n')
                     return
+        # issue launch command
         if self.vehicle.armed:
-            try:
-                console.white('... liftoff & approach target altitude')
-                self.vehicle.simple_takeoff(7)
-                self._wait(10)
-                # we are not yaw ready after launch
-                self.yaw_ready = False
-                # success output
-                console.white('... launch successful, hovering at {}m'.format(
-                        str(self.vehicle.location.global_relative_frame.alt)
-                    ))
-            except KeyboardInterrupt:
-                # override launch w/ ctrl-c, triggers emergency landing
-                console.blank()     # blank line after the ctrl-C (^C in console)
-                console.red("... abort takeoff, attempt landing")
-                self.vehicle.mode = dronekit.VehicleMode("LAND")
+            altitude = 7
+            self.vehicle.simple_takeoff(launch_alt)
+            console.white('... liftoff & approach target altitude')
+            # wait for drone to reach launch altitude
+            while True:
+                self._wait()
+                if self.vehicle.location.global_relative_frame.alt >= (altitude * .9):
+                    break
+            console.white('... launch successful, hovering at {}m'.format(
+                    str(self.vehicle.location.global_relative_frame.alt)
+                ))
+            # issue dummy move command to allow yaw control
+            self.vehicle.simple_goto(self.vehicle.location.global_relative_frame)
         else:
-            console.red('... an error occured while arming the vehicle')
+            console.white('... an error occured while arming the vehicle')
         console.blank()
 
     def do_land(self, args):
         ''' set the drone to descend and land at the current location '''
         if self._vehicle_is_not_active():
             return
-        console.white('begin landing sequence')
+        console.white('begin land sequence')
         self.vehicle.mode = dronekit.VehicleMode("LAND")
         console.white('... landing command issued')
         console.white('... approaching ground')
         while True:
             if not self.vehicle.armed:
                 break
-            self._wait(7)
+            self._wait()
         # success output
         console.white('... landing successful, vehicle shutdown \n')
 
