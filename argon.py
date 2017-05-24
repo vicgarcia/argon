@@ -73,7 +73,7 @@ class argsparse(object):
         return latitude, longitude
 
 
-class Vehicle(dronekit.Vehicle):
+class IRIS(dronekit.Vehicle):
     ''' extend the base dronekit vehicle to provide
         better yaw and camera trigger control methods
     '''
@@ -118,7 +118,6 @@ class App(cmd.Cmd):
     prompt = '# '               # console prompt character prefix
     speed = 5.0                 # vehicle speed as a float
     range = 200                 # max position movement range
-    vehicle_class = Vehicle     # class to use for vehicle connection
     yaw_ready = False           # is the vehicle ready for yaw control
 
     def cmdloop(self):
@@ -137,7 +136,7 @@ class App(cmd.Cmd):
             console.white("... waiting on connection")
             if test == True:
                 self.vehicle = dronekit.connect('tcp:127.0.0.1:5760',
-                        vehicle_class=self.vehicle_class,
+                        vehicle_class=IRIS,
                         status_printer=self._status_printer,
                         wait_ready=True,
                         heartbeat_timeout=30,   # 30 second timeout
@@ -145,7 +144,7 @@ class App(cmd.Cmd):
             else:
                 self.vehicle = dronekit.connect('/dev/cu.usbserial-DJ00DSDS',
                         baud=57600,
-                        vehicle_class=self.vehicle_class,
+                        vehicle_class=IRIS,
                         status_printer=self._status_printer,
                         wait_ready=True,
                         heartbeat_timeout=30,   # 30 second timeout
