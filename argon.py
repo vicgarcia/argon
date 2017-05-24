@@ -31,7 +31,7 @@ class console(object):
         puts(colored.red(text))
 
 
-class argsparse(object):
+class arguments(object):
     ''' methods for parsing arguments from Cmd app console line args '''
 
     @classmethod
@@ -352,7 +352,7 @@ class App(cmd.Cmd):
             return
         location = self.vehicle.location.global_relative_frame
         # parse & verify target latitude/longitude
-        latitude, longitude = argsparse.position(args)
+        latitude, longitude = arguments.position(args)
         if latitude is None or longitude is None:
             console.red('invalid params, must provide --lat/--lng \n')
             return
@@ -364,7 +364,7 @@ class App(cmd.Cmd):
                 console.red('new position is outside control range of {}m \n'.format(self.range))
                 return
         # parse & verify target altitude, use current if not provided
-        altitude = argsparse.altitude(args)
+        altitude = arguments.altitude(args)
         if altitude is not None:
             if altitude < 4 or altitude > 120:
                 console.red('must provide an altitude between 5m and 120m \n')
@@ -388,9 +388,9 @@ class App(cmd.Cmd):
             return
         location = self.vehicle.location.global_relative_frame
         # parse arguments from console
-        heading = argsparse.heading(args)
-        distance = argsparse.distance(args)
-        altitude = argsparse.altitude(args)
+        heading = arguments.heading(args)
+        distance = arguments.distance(args)
+        altitude = arguments.altitude(args)
         # verify provided parameters
         if (heading != None and distance == None) \
                 or (heading == None and distance != None):
@@ -439,7 +439,7 @@ class App(cmd.Cmd):
         if self._vehicle_is_not_in_guided_mode():
             return
         # parse arguments from console
-        heading = argsparse.heading(args)
+        heading = arguments.heading(args)
         if heading is not None:
             if self._heading_is_not_valid(heading):
                 return
