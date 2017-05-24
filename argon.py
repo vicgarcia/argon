@@ -296,7 +296,7 @@ class App(cmd.Cmd):
             # wait for drone to reach launch altitude
             while True:
                 self._wait()
-                if self.vehicle.location.global_relative_frame.alt >= (altitude * .9):
+                if self.vehicle.location.global_relative_frame.alt >= (altitude * .95):
                     break
             console.white('... launch successful, hovering at {}m'.format(
                     str(self.vehicle.location.global_relative_frame.alt)
