@@ -117,7 +117,7 @@ class IRIS(dronekit.Vehicle):
 class App(cmd.Cmd):
     prompt = '# '               # console prompt character prefix
     speed = 5.0                 # vehicle speed as a float
-    range = 200                 # max position movement range
+    range = 300                 # max position movement range
     yaw_ready = False           # is the vehicle ready for yaw control
 
     def cmdloop(self):
@@ -348,13 +348,13 @@ class App(cmd.Cmd):
             current = LatLon(location.lat, location.lon)
             new = LatLon(latitude, longitude)
             if (current.distance(new) * 1000) > self.range:
-                console.red('new position is outside control range \n')
+                console.red('new position is outside control range of {}m \n'.format(self.range))
                 return
         # parse & verify target altitude, use current if not provided
         altitude = argsparse.altitude(args)
         if altitude is not None:
             if altitude < 4 or altitude > 120:
-                console.red('must provide a valid altitude between 5m and 120m \n')
+                console.red('must provide an altitude between 5m and 120m \n')
                 return
         else:
             altitude = location.alt
@@ -393,13 +393,13 @@ class App(cmd.Cmd):
                     return
             # verify distance is greater than 5m and less than 200m
             if distance:
-                if distance < 5 or distance > 200:
-                    console.red('must provide a valid distance between 5m and 200m \n')
+                if distance < 5 or distance > self.range:
+                    console.red('must provide a distance between 5m and {}m \n'.format(self.range))
                     return
             # verify altitude is between 4m and 120m, use current if not provided
             if altitude is not None:
                 if altitude < 4 or altitude > 120:
-                    console.red('must provide a valid altitude between 5m and 120m \n')
+                    console.red('must provide a altitude between 5m and 120m \n')
                     return
             else:
                 altitude = location.alt
