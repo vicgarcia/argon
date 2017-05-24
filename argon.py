@@ -232,34 +232,6 @@ class App(cmd.Cmd):
             console.white("must provide a mode, 'guided' or 'loiter'")
         console.blank()
 
-    def do_yaw(self, args):
-        ''' lock yaw at --head=X or --unlock '''
-        # check vehicle status and mode
-        if self._vehicle_is_not_active():
-            return
-        if self._vehicle_is_not_in_guided_mode():
-            return
-        # the vehicle yaw cannot be managed after launch until it moves
-        # this is a thing in the arducopter firmware
-        # argon tracks/guards/reports this for UX
-        if not self.yaw_ready:
-            console.red("yaw not ready, must move vehicle first")
-            return
-        # parse arguments from console
-        heading = argsparse.heading(args)
-        if heading is not None:
-            if self._heading_is_not_valid(heading):
-                return
-            console.white("locking vehicle yaw")
-            self.vehicle.lock_yaw(heading)
-        else:
-            if '--unlock' in args:
-                console.white("unlocking vehicle yaw")
-                self.vehicle.unlock_yaw()
-            else:
-                console.white("must provide a --head=X or --unlock parameter")
-        console.blank()
-
     def _heading_is_not_valid(self, heading):
         if heading < 1 or heading > 360:
             console.red("must provide a heading between 1 and 360 \n")
@@ -392,7 +364,6 @@ class App(cmd.Cmd):
                 dronekit.LocationGlobalRelative(latitude, longitude, altitude),
                 groundspeed=self.speed
             )
-        self.yaw_ready = True
         console.white('... position update command issued \n')
 
     def do_move(self, args):
@@ -445,8 +416,28 @@ class App(cmd.Cmd):
                 dronekit.LocationGlobalRelative(latitude, longitude, altitude),
                 groundspeed=self.speed
             )
-        self.yaw_ready = True
         console.white('... position update command issued \n')
+
+    def do_yaw(self, args):
+        ''' lock yaw at --head=X or --unlock '''
+        # check vehicle status and mode
+        if self._vehicle_is_not_active():
+            return
+        if self._vehicle_is_not_in_guided_mode():
+            return
+        # parse arguments from console
+        heading = argsparse.heading(args)
+        if heading is not None:
+            if self._heading_is_not_valid(heading):
+                return
+            console.white("locking vehicle yaw")
+            self.vehicle.lock_yaw(heading)
+        elif '--unlock' in args:
+            console.white("unlocking vehicle yaw")
+            self.vehicle.unlock_yaw()
+        else:
+            console.red("must provide a --head=X or --unlock parameter")
+        console.blank()
 
     def _find_position_by_offset(self, position, heading, distance):
         ''' find offset from position (LatLon) by heading/distance (ints)
