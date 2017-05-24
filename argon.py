@@ -322,7 +322,7 @@ class App(cmd.Cmd):
                 break
             self._wait()
         # success output
-        console.white('... landing successful, vehicle shutdown \n')
+        console.white('... vehicle shutdown \n')
 
     def do_home(self, args):
         ''' return to launch position at current altitude '''
