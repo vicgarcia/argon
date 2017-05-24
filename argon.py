@@ -118,7 +118,6 @@ class App(cmd.Cmd):
     prompt = '# '               # console prompt character prefix
     speed = 5.0                 # vehicle speed as a float
     range = 300                 # max position movement range
-    yaw_ready = False           # is the vehicle ready for yaw control
 
     def cmdloop(self):
         try:
