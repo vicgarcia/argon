@@ -115,6 +115,8 @@ class IRIS(dronekit.Vehicle):
 
 
 class App(cmd.Cmd):
+    ''' console application to control drone '''
+
     prompt = '# '               # console prompt character prefix
     speed = 5.0                 # vehicle speed as a float
     range = 300                 # max position movement range
@@ -476,7 +478,7 @@ if __name__ == '__main__':
     # check for the --test flag from the command line
     test = True if '--test' in ' '.join(sys.argv) else False
 
-    # if running in test mode, start the simulator in another process
+    # if running in test mode, start the simulator
     if test:
         sitl = dronekit_sitl.start_default(lat=41.9751961, lon=-87.6636616)
 
@@ -484,7 +486,7 @@ if __name__ == '__main__':
     app = App(test=test)
     app.cmdloop()
 
-    # if running in test mode, end the simulator before finishing
+    # if running in test mode, end the simulator
     if test:
         sitl.stop()
 
