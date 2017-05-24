@@ -1,14 +1,14 @@
-import cmd, os, sys, re, time
-import dronekit
+import cmd, re, time
+import os, sys
+import dronekit, dronekit_sitl
 from pymavlink import mavutil
-import LatLon as latlon
+from LatLon import LatLon
 from clint.textui import puts, colored
 
 
+
 class console(object):
-    ''' methods for console output using clint components
-        structured to provide interface similar to a module
-    '''
+    ''' methods for console output using clint components '''
 
     @classmethod
     def clear(cls):
@@ -32,9 +32,7 @@ class console(object):
 
 
 class argsparse(object):
-    ''' methods for parsing arguments from Cmd app console line args
-        structured to provide interface similar to a module
-    '''
+    ''' methods for parsing arguments from Cmd app console line args '''
 
     @classmethod
     def _parse_abstract(cls, line, regex, typ):
@@ -49,55 +47,33 @@ class argsparse(object):
         return value
 
     @classmethod
-    def speed(cls, line):
-        ''' parse --speed argument to a float '''
-        return cls._parse_abstract(line, r'speed=(\d+)', int)
-
-    @classmethod
-    def delay(cls, line):
-        ''' parse --delay argument to an int '''
-        return cls._parse_abstract(line, r'delay=(\d+)', int)
-
-    @classmethod
     def altitude(cls, line):
-        ''' parse --altitude argument to an int '''
-        return cls._parse_abstract(line, r'altitude=(\d+)', int)
+        ''' parse --alt argument to an int '''
+        return cls._parse_abstract(line, r'alt=(\d+)', int)
 
     @classmethod
     def distance(cls, line):
-        ''' parse --distance argument to an int '''
-        return cls._parse_abstract(line, r'distance=(\d+)', int)
+        ''' parse --dist argument to an int '''
+        return cls._parse_abstract(line, r'dist=(\d+)', int)
 
     @classmethod
     def heading(cls, line):
-        ''' parse --heading argument to an int
-        '''
-        return cls._parse_abstract(line, r'heading=(\d+)', int)
-
-    @classmethod
-    def latitude(cls, line):
-        ''' parse --latitude argument to a float '''
-        return cls._parse_abstract(line, r'latitude=(-?\d+.\d+)', float)
-
-    @classmethod
-    def longitude(cls, line):
-        ''' parse --longitude argument to a float '''
-        return cls._parse_abstract(line, r'longitude=(-?\d+.\d+)', float)
+        ''' parse --head argument to an int '''
+        return cls._parse_abstract(line, r'head=(\d+)', int)
 
     @classmethod
     def position(cls, line):
-        ''' parse --lat/--lng/--alt arguments to a tuple '''
+        ''' parse --lat/--lng arguments to a tuple '''
         # parse lat/lng/alt as floats, int
         latitude = cls._parse_abstract(line, r'lat=(-?\d+.\d+)', float)
         longitude = cls._parse_abstract(line, r'lng=(-?\d+.\d+)', float)
-        altitude = cls._parse_abstract(line, r'alt=(\d+)', int)
         # only return lat/lng as a pair, otherwise both as None
         if latitude == None or longitude == None:
             latitude, longitude = None, None
-        return latitude, longitude, altitude
+        return latitude, longitude
 
 
-class Vehicle(dronekit.Vehicle):
+class IRIS(dronekit.Vehicle):
     ''' extend the base dronekit vehicle to provide
         better yaw and camera trigger control methods
     '''
@@ -139,20 +115,9 @@ class Vehicle(dronekit.Vehicle):
 
 
 class App(cmd.Cmd):
-    ''' Cmd-frameworked console application for controlling drone
-        allow fine position control through command line interface
-        intended to augment control of drone via radio
-    '''
-
     prompt = '# '               # console prompt character prefix
-    range_limit = 500           # 500m range
-    min_alt = 3                 # 3m-120m altitude envelope
-    max_alt = 120
-    launch_alt = 7              # 7m initial launch altitude
-    base_speed = 5              # 3 m/s base speed
-    heartbeat_timeout = 30      # 30 second timeout
-    vehicle_class = Vehicle     # class to use for vehicle connection
-    low_battery = 11.0          # vehicle cannot arm with battery below
+    speed = 5.0                 # vehicle speed as a float
+    range = 300                 # max position movement range
     yaw_ready = False           # is the vehicle ready for yaw control
 
     def cmdloop(self):
@@ -165,41 +130,42 @@ class App(cmd.Cmd):
     def __init__(self, test=False):
         cmd.Cmd.__init__(self)
         console.clear()
-        console.white("# argon : dronekit-based custom flight control console \n")
+        console.white("# argon : dronekit-based flight control console \n")
         console.white("connecting to drone")
         try:
             console.white("... waiting on connection")
             if test == True:
                 self.vehicle = dronekit.connect('tcp:127.0.0.1:5760',
-                        vehicle_class=self.vehicle_class,
+                        vehicle_class=IRIS,
                         status_printer=self._status_printer,
                         wait_ready=True,
-                        heartbeat_timeout=self.heartbeat_timeout
+                        heartbeat_timeout=30,   # 30 second timeout
                     )
             else:
                 self.vehicle = dronekit.connect('/dev/cu.usbserial-DJ00DSDS',
                         baud=57600,
-                        vehicle_class=self.vehicle_class,
+                        vehicle_class=IRIS,
                         status_printer=self._status_printer,
                         wait_ready=True,
-                        heartbeat_timeout=self.heartbeat_timeout
+                        heartbeat_timeout=30,   # 30 second timeout
                     )
             console.white("... connected \n")
         except KeyboardInterrupt:
             console.white("... canceling connection attempt \n")
-            self._exit()
+            return True
         except Exception:
             console.white("... unable to connect \n")
-            self._exit()
+            return True
 
     def default(self, args):
         console.red("unknown command, try 'help' for available commands \n")
 
+    def emptyline(self):
+        console.blank()
+        pass
+
     def _status_printer(self, txt):
         return
-
-    def _exit(self):
-        sys.exit(1)
 
     def _wait(self, delay=3):
         time.sleep(delay)
@@ -211,9 +177,8 @@ class App(cmd.Cmd):
         console.clear()
 
     def do_version(self, args):
-        ''' print current version of argon and vehicle firmware version '''
+        ''' print current vehicle firmware version '''
         self.vehicle.wait_ready('autopilot_version')
-        console.white("console console : 0.6.0")
         console.white("vehicle firmware : {}".format(self.vehicle.version))
         console.blank()
 
@@ -221,7 +186,7 @@ class App(cmd.Cmd):
         ''' close connection to vehicle and exit console environment '''
         console.white("closing connection \n")
         self.vehicle.close()
-        self._exit()
+        return True
 
     def do_help(self, args):
         ''' print help text, all commands with options/details '''
@@ -240,24 +205,6 @@ class App(cmd.Cmd):
         console.blank()
 
     def do_telemetry(self, args):
-        ''' get telemetry data, once '''
-        self._print_telemetry()
-        console.blank()
-
-    def do_monitor(self, args):
-        ''' get telemetry data, continously every 4 seconds '''
-        # begin monitoring loop
-        try:
-            while True:
-                self._print_telemetry()
-                self._wait(4)   # hard-coded 4 second delay
-                console.blank()
-        except KeyboardInterrupt:
-            console.blank()
-            # nb : these uses of new lines is for ctrl-c behavior
-        console.blank()
-
-    def _print_telemetry(self):
         ''' print the telemetry data from vehicle to the console '''
         location = self.vehicle.location.global_relative_frame
         console.white("position: {}, {}".format(location.lat, location.lon))
@@ -268,6 +215,7 @@ class App(cmd.Cmd):
                 self.vehicle.battery.voltage,
                 self.vehicle.parameters['FS_BATT_VOLTAGE']
             ))
+        console.blank()
 
     def do_mode(self, arg):
         ''' set vehicle mode to 'guided', 'loiter' '''
@@ -282,34 +230,6 @@ class App(cmd.Cmd):
             self.vehicle.mode = modes[arg]
         else:
             console.white("must provide a mode, 'guided' or 'loiter'")
-        console.blank()
-
-    def do_yaw(self, args):
-        ''' lock yaw at --heading=X or --unlock '''
-        # check vehicle status and mode
-        if self._vehicle_is_not_active():
-            return
-        if self._vehicle_is_not_in_guided_mode():
-            return
-        # the vehicle yaw cannot be managed after launch until it moves
-        # this is a thing in the arducopter firmware
-        # argon tracks/guards/reports this for UX
-        if not self.yaw_ready:
-            console.red("yaw not ready, must move vehicle first")
-            return
-        # parse arguments from console
-        heading = argsparse.heading(args)
-        if heading is not None:
-            if self._heading_is_not_valid(heading):
-                return
-            console.white("locking vehicle yaw")
-            self.vehicle.lock_yaw(heading)
-        else:
-            if '--unlock' in args:
-                console.white("unlocking vehicle yaw")
-                self.vehicle.unlock_yaw()
-            else:
-                console.white("must provide a --heading=X or --unlock parameter")
         console.blank()
 
     def _heading_is_not_valid(self, heading):
@@ -346,7 +266,7 @@ class App(cmd.Cmd):
             console.red("vehicle is already ACTIVE \n")
             return
         if not self.vehicle.is_armable:
-            if self.vehicle.battery.voltage < self.low_battery:
+            if self.vehicle.battery.voltage < 11.0:
                 console.red("vehicle cannot be ARMED with low battery \n")
             elif self.vehicle.gps_0.fix_type != 3:
                 console.red("vehicle cannot be ARMED without GPS fix \n")
@@ -354,54 +274,51 @@ class App(cmd.Cmd):
                 console.red("vehicle cannot be ARMED \n")
             return
         # arm and launch the vehicle
-        console.white('begining launching sequence')
+        console.white('begin launch sequence')
         console.white('... preflight checks')
         self.vehicle.mode = dronekit.VehicleMode("GUIDED")
         if not self.vehicle.armed:
             self.vehicle.armed = True
             console.white('... wait for vehicle to arm')
-            maximum_wait = 5 # 15 second wait time
+            # wait for the vehicle to arm (15 seconds max)
             wait_count = 0
             while not self.vehicle.armed:
-                self._wait() # wait 3 seconds between checks, 5 checks
+                self._wait()
                 wait_count += 1
-                # this is mostly to handle safety switch not engaged
-                if wait_count == maximum_wait:
-                    console.white('...aborting launch \n')
-                    console.red('vehicle cannot be ARMED \n')
+                if wait_count == 5:
+                    console.white('... vehicle cannot be armed \n')
                     return
+        # issue launch command
         if self.vehicle.armed:
-            try:
-                console.white('... liftoff & approach target altitude')
-                self.vehicle.simple_takeoff(self.launch_alt)
-                self._wait(10)
-                # we are not yaw ready after launch
-                self.yaw_ready = False
-                # success output
-                console.white('... launch successful, hovering at {}m'.format(
-                        str(self.vehicle.location.global_relative_frame.alt)
-                    ))
-            except KeyboardInterrupt:
-                # override launch w/ ctrl-c, triggers emergency landing
-                console.blank()     # blank line after the ctrl-C (^C in console)
-                console.red("... abort takeoff, attempt landing")
-                self.vehicle.mode = dronekit.VehicleMode("LAND")
+            altitude = 7
+            self.vehicle.simple_takeoff(altitude)
+            console.white('... liftoff & approach target altitude')
+            # wait for drone to reach launch altitude
+            while True:
+                self._wait()
+                if self.vehicle.location.global_relative_frame.alt >= (altitude * .95):
+                    break
+            console.white('... launch successful, hovering at {}m'.format(
+                    str(self.vehicle.location.global_relative_frame.alt)
+                ))
+            # issue dummy move command to allow yaw control
+            self.vehicle.simple_goto(self.vehicle.location.global_relative_frame)
         else:
-            console.red('... an error occured while arming the vehicle')
+            console.white('... an error occured while arming the vehicle')
         console.blank()
 
     def do_land(self, args):
         ''' set the drone to descend and land at the current location '''
         if self._vehicle_is_not_active():
             return
-        console.white('begin landing sequence')
+        console.white('begin land sequence')
         self.vehicle.mode = dronekit.VehicleMode("LAND")
         console.white('... landing command issued')
         console.white('... approaching ground')
         while True:
             if not self.vehicle.armed:
                 break
-            self._wait(7)
+            self._wait()
         # success output
         console.white('... landing successful, vehicle shutdown \n')
 
@@ -414,120 +331,113 @@ class App(cmd.Cmd):
         console.white('... RTL command issued \n')
 
     def do_position(self, args):
-        ''' move to the location provided as --lat/--lng and await arrival
-            provide option --speed=X (1-8) and --alt=X (w/in range)
-        '''
+        ''' move to the location provided as --lat/--lng with optional --alt '''
         # check vehicle status and mode
         if self._vehicle_is_not_active():
             return
         if self._vehicle_is_not_in_guided_mode():
             return
-        # parse arguments and verify lat/lng, handle alt as optional
-        loc = self.vehicle.location.global_relative_frame
-        lat, lng, alt = argsparse.position(args)
-        if lat is None or lng is None:
-            console.white('invalid params, must provide --lat/--lng \n')
+        location = self.vehicle.location.global_relative_frame
+        # parse & verify target latitude/longitude
+        latitude, longitude = argsparse.position(args)
+        if latitude is None or longitude is None:
+            console.red('invalid params, must provide --lat/--lng \n')
             return
         else:
-            # verify lat/lng provided, point is within 1000m of current
-            current = latlon.LatLon(loc.lat, loc.lon)
-            new = latlon.LatLon(lat, lng)
-            if (current.distance(new) * 1000) > self.range_limit:
-                console.white('new position is outside control range \n')
+            # verify latitude/longitude provided is within 300m of current
+            current = LatLon(location.lat, location.lon)
+            new = LatLon(latitude, longitude)
+            if (current.distance(new) * 1000) > self.range:
+                console.red('new position is outside control range of {}m \n'.format(self.range))
                 return
-        # parse speed argument, use default when not provided
-        speed = argsparse.speed(args)
-        if speed is None:
-            speed = self.base_speed
-        else:
-            if speed < 1 or speed > 8:
-                console.white('invalid speed, must be between 1 and 8 \n')
-                return
-        # verify altitude doesn't exceed min/max, if not provided use current
-        if alt is not None:
-            if alt > self.max_alt:
-                console.white('altitude exceeds maximum of {}m \n'.format(self.max_alt))
-                return
-            if alt < self.min_alt:
-                console.white('altitude is below minimum of {}m \n'.format(self.max_alt))
+        # parse & verify target altitude, use current if not provided
+        altitude = argsparse.altitude(args)
+        if altitude is not None:
+            if altitude < 4 or altitude > 120:
+                console.red('must provide an altitude between 5m and 120m \n')
                 return
         else:
-            alt = loc.alt
+            altitude = location.alt
         # issue move command
         console.white('update vehicle position')
         self.vehicle.simple_goto(
-                dronekit.LocationGlobalRelative(lat, lng, alt),
-                groundspeed=float(speed)
+                dronekit.LocationGlobalRelative(latitude, longitude, altitude),
+                groundspeed=self.speed
             )
-        self.yaw_ready = True
         console.white('... position update command issued \n')
 
     def do_move(self, args):
-        ''' move to position via --heading/--distance and/or --altitude
-            provide optionally --speed=X (1-8)
-        '''
+        ''' move to position via --head/--dist and/or --alt '''
         # check vehicle status and mode
         if self._vehicle_is_not_active():
             return
         if self._vehicle_is_not_in_guided_mode():
             return
-        # parse arguments from console
         location = self.vehicle.location.global_relative_frame
+        # parse arguments from console
         heading = argsparse.heading(args)
         distance = argsparse.distance(args)
-        speed = argsparse.speed(args)
-        alt = argsparse.altitude(args)
-        # must provide heading and distance, or neither
+        altitude = argsparse.altitude(args)
+        # verify provided parameters
         if (heading != None and distance == None) \
                 or (heading == None and distance != None):
-            console.white('must provide --heading/--distance together, or not at all \n')
+            console.red('must provide --head/--dist together, or not at all \n')
             return
-        elif (heading == None and distance == None and alt == None):
-            console.white('must provide --heading/--distance, and/or --altitude params \n')
+        elif (heading == None and distance == None and altitude == None):
+            console.red('must provide --head/--dist, and/or --alt params \n')
             return
         else:
             # verify heading is between 1 and 360
             if heading:
                 if self._heading_is_not_valid(heading):
                     return
-            # verify distance is less than 200 m
+            # verify distance is greater than 5m and less than 200m
             if distance:
-                if distance < 5 or distance > 200:
-                    console.white('must provide a valid distance between 5 and 200 m \n')
+                if distance < 5 or distance > self.range:
+                    console.red('must provide a distance between 5m and {}m \n'.format(self.range))
                     return
-            # verify altitude, or use current if not provided
-            if alt is not None:
-                if alt > self.max_alt:
-                    console.white('altitude exceeds maximum of {}m \n'.format(self.max_alt))
-                    return
-                if alt < self.min_alt:
-                    console.white('altitude is below minimum of {}m \n'.format(self.min_alt))
+            # verify altitude is between 4m and 120m, use current if not provided
+            if altitude is not None:
+                if altitude < 4 or altitude > 120:
+                    console.red('must provide a altitude between 5m and 120m \n')
                     return
             else:
-                alt = location.alt
-            # verify speed, use default when not provided (ignored for alt only)
-            if speed is None:
-                speed = self.base_speed
-            else:
-                if speed < 1 or speed > 8:
-                    console.white('invalid speed, must be between 1 and 8 \n')
-                    return
-        # calculate lat/lng position from params or use existing
+                altitude = location.alt
+        # calculate latitude/longitude position from params or use existing
         console.white('update vehicle position')
         if heading and distance:
-            current = latlon.LatLon(location.lat, location.lon)
-            lat, lng = self._find_position_by_offset(current, heading, distance)
             console.white('... calculate new position from parameters')
+            current = LatLon(location.lat, location.lon)
+            latitude, longitude = self._find_position_by_offset(current, heading, distance)
         else:
-            lat, lng = (location.lat, location.lon)
-            console.white('... calculate altitude at current position')
+            latitude, longitude = (location.lat, location.lon)
         # issue move command
         self.vehicle.simple_goto(
-                dronekit.LocationGlobalRelative(lat, lng, alt),
-                groundspeed=float(speed)
+                dronekit.LocationGlobalRelative(latitude, longitude, altitude),
+                groundspeed=self.speed
             )
-        self.yaw_ready = True
         console.white('... position update command issued \n')
+
+    def do_yaw(self, args):
+        ''' lock yaw at --head=X or --unlock '''
+        # check vehicle status and mode
+        if self._vehicle_is_not_active():
+            return
+        if self._vehicle_is_not_in_guided_mode():
+            return
+        # parse arguments from console
+        heading = argsparse.heading(args)
+        if heading is not None:
+            if self._heading_is_not_valid(heading):
+                return
+            console.white("locking vehicle yaw")
+            self.vehicle.lock_yaw(heading)
+        elif '--unlock' in args:
+            console.white("unlocking vehicle yaw")
+            self.vehicle.unlock_yaw()
+        else:
+            console.red("must provide a --head=X or --unlock parameter")
+        console.blank()
 
     def _find_position_by_offset(self, position, heading, distance):
         ''' find offset from position (LatLon) by heading/distance (ints)
@@ -549,6 +459,19 @@ class App(cmd.Cmd):
 
 
 if __name__ == '__main__':
-    test_flag = True if '--test' in ' '.join(sys.argv) else False
-    App(test=test_flag).cmdloop()
+
+    # check for the --test flag from the command line
+    test = True if '--test' in ' '.join(sys.argv) else False
+
+    # if running in test mode, start the simulator in another process
+    if test:
+        sitl = dronekit_sitl.start_default(lat=41.9751961, lon=-87.6636616)
+
+    # enter the console application
+    app = App(test=test)
+    app.cmdloop()
+
+    # if running in test mode, end the simulator before finishing
+    if test:
+        sitl.stop()
 

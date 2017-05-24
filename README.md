@@ -1,29 +1,18 @@
 Argon is a console application to control a 3D Robotics IRIS+.
 
-The goal of Argon is to get acquainted with dronekit as well as
-navigate the IRIS+ to specified coordinates and capture images.
-
-Argon uses dronekit, a python library provided by 3D Robotics.
-
-Use the 'help' command in the application or refer to the help.txt
-file in this repository for Argon's full command set.
-
-The console application can be run directly ...
-
-```
-  ./env/bin/python argon.py
 ```
 
-To test with SITL, use two terminal windows ...
+# clone the repository
+git clone git@github.com:vicgarcia/argon.git
 
-Run the drone simulator in terminal one.
+# setup virtual environment
+cd argon
+virtualenv --no-site-packages env
 
-```
-  ./env/bin/dronekit-sitl copter --home=41.9751961,-87.6636616,0,0
-```
+# install dependencies
+./env/bin/pip install -r requirements.txt
 
-Run the console in test mode in terminal two.
+# run argon in test mode, which uses the dronekit simulator
+./env/bin/python argon.py --test
 
-```
-  ./env/bin/python argon.py --test
 ```
