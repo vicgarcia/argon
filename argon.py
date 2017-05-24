@@ -302,6 +302,9 @@ class App(cmd.Cmd):
                 ))
             # issue dummy move command to allow yaw control
             self.vehicle.simple_goto(self.vehicle.location.global_relative_frame)
+            # save position for use w/ the home command
+            home = self.vehicle.location.global_relative_frame
+            self.home = LatLon(home.lat, home.lon)
         else:
             console.white('... an error occured while arming the vehicle')
         console.blank()
@@ -320,6 +323,17 @@ class App(cmd.Cmd):
             self._wait()
         # success output
         console.white('... landing successful, vehicle shutdown \n')
+
+    def do_home(self, args):
+        ''' return to launch position at current altitude '''
+        console.white('update position to home at current altitude')
+        current = self.vehicle.location.global_relative_frame
+        home = self.home
+        self.vehicle.simple_goto(
+                dronekit.LocationGlobalRelative(home.lat, home.lon, current.alt),
+                groundspeed=self.speed
+            )
+        console.white('... position update command issued \n')
 
     def do_return(self, args):
         ''' set the drone to RTL mode to execute automatic return/landing '''
