@@ -282,13 +282,13 @@ class App(cmd.Cmd):
             self.vehicle.armed = True
             console.white('... wait for vehicle to arm')
             # wait for the vehicle to arm (15 seconds max)
-            wait_count = 0
-            while not self.vehicle.armed:
+            for _ in range(0, 5):
                 self._wait()
-                wait_count += 1
-                if wait_count == 5:
-                    console.white('... vehicle cannot be armed \n')
-                    return
+                if self.vehicle.armed:
+                    break
+            else:
+                console.white('... vehicle cannot be armed \n')
+                return
         # issue launch command
         if self.vehicle.armed:
             altitude = 7
