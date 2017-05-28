@@ -381,6 +381,15 @@ class App(cmd.Cmd):
             )
         console.white('... position update command issued \n')
 
+    def _calculate_point_by_offset(self, position, heading, distance):
+        ''' find offset from position (LatLon) by heading/distance (ints)
+            --heading=X is degrees 1-360, --distance=X is meters
+            returns lat, lng as floats in a tuple
+        '''
+        distance_as_km = float(distance) / 1000
+        lat, lng = position.offset(heading, distance_as_km).to_string('D')
+        return (float(lat), float(lng))
+
     def do_move(self, args):
         ''' move to position via --head/--dist and/or --alt '''
         # check vehicle status and mode
@@ -423,7 +432,7 @@ class App(cmd.Cmd):
         if heading and distance:
             console.white('... calculate new position from parameters')
             current = LatLon(location.lat, location.lon)
-            latitude, longitude = self._find_position_by_offset(current, heading, distance)
+            latitude, longitude = self._calculate_point_by_offset(current, heading, distance)
         else:
             latitude, longitude = (location.lat, location.lon)
         # issue move command
@@ -453,15 +462,6 @@ class App(cmd.Cmd):
         else:
             console.red("must provide a --head=X or --unlock parameter")
         console.blank()
-
-    def _find_position_by_offset(self, position, heading, distance):
-        ''' find offset from position (LatLon) by heading/distance (ints)
-            --heading=X is degrees 1-360, --distance=X is meters
-            returns lat, lng as floats in a tuple
-        '''
-        distance_as_km = float(distance) / 1000
-        lat, lng = position.offset(heading, distance_as_km).to_string('D')
-        return (float(lat), float(lng))
 
     def do_camera(self, args):
         ''' trigger camera to capture a photo '''
