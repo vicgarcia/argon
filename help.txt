@@ -50,8 +50,13 @@ camera
   send the vehicle signal to trigger camera to capture photo
   command enforces a wait time of 5 seconds
 
+home
+  signal vehicle to return to home at current altitude
+  requires that the vehicle is active
+  this is not RTL, vehicle will return to home and hover
+
 return
-  signal vehicle to return to home and land
+  signal vehicle to return to home and land (RTL mode)
   requires that the vehicle is active
   this command will not block while the vehicle responds
 

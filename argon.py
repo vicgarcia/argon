@@ -6,7 +6,6 @@ from LatLon import LatLon
 from clint.textui import puts, colored
 
 
-
 class console(object):
     ''' methods for console output using clint components '''
 
@@ -119,7 +118,7 @@ class App(cmd.Cmd):
 
     prompt = '# '               # console prompt character prefix
     speed = 5.0                 # vehicle speed as a float
-    range = 300                 # max position movement range
+    range = 300                 # max movement distance
 
     def cmdloop(self):
         try:
@@ -327,7 +326,7 @@ class App(cmd.Cmd):
         console.white('... vehicle shutdown \n')
 
     def do_home(self, args):
-        ''' return to launch position at current altitude '''
+        ''' move to launch position at current altitude '''
         console.white('update position to home at current altitude')
         current = self.vehicle.location.global_relative_frame
         home = self.home
