@@ -1,5 +1,8 @@
+# vscode configuration
+.vscode/*
+
 # virtualenv path
-env/*
+venv/*
 
 # .pyc files
 *.pyc
