@@ -10,3 +10,5 @@ venv/*
 # log files
 *.log
 
+# junk files
+.DS_Store
