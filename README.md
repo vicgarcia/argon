@@ -2,9 +2,6 @@
 
 Argon is a console application to control a 3D Robotics IRIS+.
 
-![drone photography](https://github.com/vicgarcia/argon/raw/dev/images/kitescape.jpg)
-https://github.com/vicgarcia/argon/raw/dev/images/fullsize.png
-
 I created this application to move the drone to set points and with
 precision movement to other points in order to capture imagery.
 
@@ -26,3 +23,5 @@ virtualenv --no-site-packages env
 ./env/bin/python argon.py --test
 
 ```
+
+![drone photography](https://github.com/vicgarcia/argon/raw/dev/images/kitescape.jpg)
