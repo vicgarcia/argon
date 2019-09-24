@@ -158,7 +158,6 @@ class App(cmd.Cmd):
 
     def emptyline(self):
         console.blank()
-        pass
 
     def _status_printer(self, txt):
         return
@@ -287,13 +286,13 @@ class App(cmd.Cmd):
                 return
         # issue launch command
         if self.vehicle.armed:
-            altitude = 7
+            altitude = 8
             self.vehicle.simple_takeoff(altitude)
             console.white('... liftoff & approach target altitude')
             # wait for drone to reach launch altitude
             while True:
                 self._wait()
-                if self.vehicle.location.global_relative_frame.alt >= (altitude * .95):
+                if self.vehicle.location.global_relative_frame.alt >= (altitude * .90):
                     break
             console.white('... launch successful, hovering at {}m'.format(
                     str(self.vehicle.location.global_relative_frame.alt)
@@ -316,9 +315,9 @@ class App(cmd.Cmd):
         console.white('... landing command issued')
         console.white('... approaching ground')
         while True:
+            self._wait()
             if not self.vehicle.armed:
                 break
-            self._wait()
         # success output
         console.white('... vehicle shutdown\n')
 
