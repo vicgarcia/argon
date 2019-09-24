@@ -180,8 +180,9 @@ class App(cmd.Cmd):
 
     def do_exit(self, args):
         ''' close connection to vehicle and exit console environment '''
-        console.white("closing connection \n")
-        self.vehicle.close()
+        console.white("closing connection\n")
+        if self.vehicle:
+            self.vehicle.close()
         return True
 
     def do_help(self, args):
