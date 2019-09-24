@@ -5,7 +5,7 @@ import re
 import time
 import dronekit
 import dronekit_sitl
-import clint import textui
+from clint import textui
 from pymavlink import mavutil
 from geopy.point import Point
 from geopy.distance import geodesic, GeodesicDistance
