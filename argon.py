@@ -121,7 +121,7 @@ class App(cmd.Cmd):
     ''' console application to control drone '''
 
     prompt = '# '               # console prompt character prefix
-    speed = 5.0                 # vehicle speed as a float
+    speed = 4.0                 # vehicle speed as a float
     range = 300                 # max movement distance
 
     def cmdloop(self):
