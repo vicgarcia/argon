@@ -83,25 +83,25 @@ class IRIS(dronekit.Vehicle):
     def lock_yaw(self, heading, direction='clock', absolute=True):
         ''' lock vehicle yaw at a specific vehicle heading '''
         msg = self.message_factory.command_long_encode(
-                0, 0,                                   # system, component
-                mavutil.mavlink.MAV_CMD_CONDITION_YAW,  # command
-                0,                                      # confirmation
-                heading,                                # yaw in degrees
-                0,                                      # speed as deg/sec
-                1 if direction == 'clock' else -1,      # -1 is CCW, 1 is CW
-                0 if absolute is True else 1,           # 1 is rel, 0 is abs
-                0, 0, 0                                 # unused parameters
-            )
+            0, 0,                                   # system, component
+            mavutil.mavlink.MAV_CMD_CONDITION_YAW,  # command
+            0,                                      # confirmation
+            heading,                                # yaw in degrees
+            0,                                      # speed as deg/sec
+            1 if direction == 'clock' else -1,      # -1 is CCW, 1 is CW
+            0 if absolute is True else 1,           # 1 is rel, 0 is abs
+            0, 0, 0                                 # unused parameters
+        )
         self.send_mavlink(msg)
 
     def unlock_yaw(self):
         ''' reset yaw to follow direction of vehicle travel '''
         msg = self.message_factory.command_long_encode(
-                0, 0,                                   # target system, component
-                mavutil.mavlink.MAV_CMD_DO_SET_ROI,     # command
-                0,                                      # confirmation
-                0, 0, 0, 0, 0, 0, 0                     # all params empty to reset
-            )
+            0, 0,                                   # target system, component
+            mavutil.mavlink.MAV_CMD_DO_SET_ROI,     # command
+            0,                                      # confirmation
+            0, 0, 0, 0, 0, 0, 0                     # all params empty to reset
+        )
         self.send_mavlink(msg)
 
     def trigger_camera(self):
@@ -334,9 +334,9 @@ class App(cmd.Cmd):
         current = self.vehicle.location.global_relative_frame
         home = self.home
         self.vehicle.simple_goto(
-                dronekit.LocationGlobalRelative(home.lat, home.lon, current.alt),
-                groundspeed=self.speed
-            )
+            dronekit.LocationGlobalRelative(home.lat, home.lon, current.alt),
+            groundspeed=self.speed
+        )
         console.white('... position update command issued \n')
 
     def do_return(self, args):
