@@ -133,7 +133,7 @@ class App(cmd.Cmd):
     def __init__(self, connection_string):
         cmd.Cmd.__init__(self)
         console.clear()
-        console.white("# argon : dronekit-based flight control console \n")
+        console.white("# argon : flight control console\n")
         console.white("connecting to drone")
         try:
             console.white("... waiting on connection")
@@ -146,14 +146,14 @@ class App(cmd.Cmd):
             )
             console.white("... connected\n")
         except KeyboardInterrupt:
-            console.white("... canceling connection attempt \n")
+            console.white("... canceling connection attempt\n")
             return True
         except Exception:
-            console.white("... unable to connect \n")
+            console.white("... unable to connect\n")
             return True
 
     def default(self, args):
-        console.red("unknown command, try 'help' for available commands \n")
+        console.red("unknown command, try 'help' for available commands\n")
 
     def emptyline(self):
         console.blank()
@@ -229,7 +229,7 @@ class App(cmd.Cmd):
 
     def _heading_is_not_valid(self, heading):
         if heading < 1 or heading > 360:
-            console.red("must provide a heading between 1 and 360 \n")
+            console.red("must provide a heading between 1 and 360\n")
             return True
         return False
 
@@ -239,7 +239,7 @@ class App(cmd.Cmd):
             otherwise return false
         '''
         if self.vehicle.system_status.state != 'ACTIVE':
-            console.red("vehicle must be ACTIVE \n")
+            console.red("vehicle must be ACTIVE\n")
             return True
         return False
 
@@ -249,7 +249,7 @@ class App(cmd.Cmd):
             otherwise return false
         '''
         if self.vehicle.mode.name != 'GUIDED':
-            console.red("vehicle must be in GUIDED mode \n")
+            console.red("vehicle must be in GUIDED mode\n")
             return True
         return False
 
@@ -258,15 +258,15 @@ class App(cmd.Cmd):
     def do_launch(self, args):
         ''' arm and launch drone, loiter at provided altitude parameter (meters) '''
         if self.vehicle.system_status.state == 'ACTIVE':
-            console.red("vehicle is already ACTIVE \n")
+            console.red("vehicle is already ACTIVE\n")
             return
         if not self.vehicle.is_armable:
             if self.vehicle.battery.voltage < 11.0:
-                console.red("vehicle cannot be ARMED with low battery \n")
+                console.red("vehicle cannot be ARMED with low battery\n")
             elif self.vehicle.gps_0.fix_type != 3:
-                console.red("vehicle cannot be ARMED without GPS fix \n")
+                console.red("vehicle cannot be ARMED without GPS fix\n")
             else:
-                console.red("vehicle cannot be ARMED \n")
+                console.red("vehicle cannot be ARMED\n")
             return
         # arm and launch the vehicle
         console.white('begin launch sequence')
@@ -281,7 +281,7 @@ class App(cmd.Cmd):
                 if self.vehicle.armed:
                     break
             else:
-                console.white('... vehicle cannot be armed \n')
+                console.white('... vehicle cannot be armed\n')
                 return
         # issue launch command
         if self.vehicle.armed:
@@ -318,7 +318,7 @@ class App(cmd.Cmd):
                 break
             self._wait()
         # success output
-        console.white('... vehicle shutdown \n')
+        console.white('... vehicle shutdown\n')
 
     def do_home(self, args):
         ''' move to launch position at current altitude '''
@@ -329,7 +329,7 @@ class App(cmd.Cmd):
             dronekit.LocationGlobalRelative(home.lat, home.lon, current.alt),
             groundspeed=self.speed
         )
-        console.white('... position update command issued \n')
+        console.white('... position update command issued\n')
 
     def do_return(self, args):
         ''' set the drone to RTL mode to execute automatic return/landing '''
@@ -337,7 +337,7 @@ class App(cmd.Cmd):
             return
         console.white('signal vehicle for return and land')
         self.vehicle.mode = dronekit.VehicleMode('RTL')
-        console.white('... RTL command issued \n')
+        console.white('... RTL command issued\n')
 
     def do_position(self, args):
         ''' move to the location provided as --lat/--lng with optional --alt '''
@@ -350,20 +350,17 @@ class App(cmd.Cmd):
         # parse & verify target latitude/longitude
         latitude, longitude = arguments.position(args)
         if latitude is None or longitude is None:
-            console.red('invalid params, must provide --lat/--lng \n')
+            console.red('invalid params, must provide --lat/--lng\n')
             return
         else:
             # verify latitude/longitude provided is within 300m of current
-            current = LatLon(location.lat, location.lon)
-            new = LatLon(latitude, longitude)
-            if (current.distance(new) * 1000) > self.range:
-                console.red('new position is outside control range of {}m \n'.format(self.range))
+                console.red('new position is outside control range of {}m\n'.format(self.range))
                 return
         # parse & verify target altitude, use current if not provided
         altitude = arguments.altitude(args)
         if altitude is not None:
             if altitude < 4 or altitude > 120:
-                console.red('must provide an altitude between 5m and 120m \n')
+                console.red('must provide an altitude between 5m and 120m\n')
                 return
         else:
             altitude = location.alt
@@ -373,7 +370,7 @@ class App(cmd.Cmd):
                 dronekit.LocationGlobalRelative(latitude, longitude, altitude),
                 groundspeed=self.speed
             )
-        console.white('... position update command issued \n')
+        console.white('... position update command issued\n')
 
     def _calculate_point_by_offset(self, position, heading, distance):
         ''' find offset from position (LatLon) by heading/distance (ints)
@@ -399,10 +396,10 @@ class App(cmd.Cmd):
         # verify provided parameters
         if (heading != None and distance == None) \
                 or (heading == None and distance != None):
-            console.red('must provide --head/--dist together, or not at all \n')
+            console.red('must provide --head/--dist together, or not at all\n')
             return
         elif (heading == None and distance == None and altitude == None):
-            console.red('must provide --head/--dist, and/or --alt params \n')
+            console.red('must provide --head/--dist, and/or --alt params\n')
             return
         else:
             # verify heading is between 1 and 360
@@ -412,12 +409,12 @@ class App(cmd.Cmd):
             # verify distance is greater than 5m and less than 200m
             if distance:
                 if distance < 5 or distance > self.range:
-                    console.red('must provide a distance between 5m and {}m \n'.format(self.range))
+                    console.red('must provide a distance between 5m and {}m\n'.format(self.range))
                     return
             # verify altitude is between 4m and 120m, use current if not provided
             if altitude is not None:
                 if altitude < 4 or altitude > 120:
-                    console.red('must provide a altitude between 5m and 120m \n')
+                    console.red('must provide a altitude between 5m and 120m\n')
                     return
             else:
                 altitude = location.alt
