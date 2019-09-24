@@ -217,9 +217,9 @@ class App(cmd.Cmd):
         ''' set vehicle mode to 'guided', 'loiter' '''
         # options as a dict, with slugs and VehicleMode object
         modes = {
-                'loiter': dronekit.VehicleMode('LOITER'),
-                'guided': dronekit.VehicleMode('GUIDED'),
-            }
+            'loiter': dronekit.VehicleMode('LOITER'),
+            'guided': dronekit.VehicleMode('GUIDED'),
+        }
         # check that the provided arguments is an option
         if arg in modes.keys():
             console.white("switching to {} mode".format(arg))
