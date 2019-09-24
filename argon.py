@@ -360,8 +360,8 @@ class App(cmd.Cmd):
         # parse & verify target altitude, use current if not provided
         altitude = arguments.altitude(args)
         if altitude is not None:
-            if altitude < 4 or altitude > 120:
-                console.red('must provide an altitude between 5m and 120m\n')
+            if altitude < 5 or altitude > 50:
+                console.red('must provide an altitude between 5m and 50\n')
                 return
         else:
             altitude = location.alt
@@ -407,15 +407,15 @@ class App(cmd.Cmd):
             if heading:
                 if self._heading_is_not_valid(heading):
                     return
-            # verify distance is greater than 5m and less than 200m
+            # verify distance is greater than 5m and less than max range
             if distance:
                 if distance < 5 or distance > self.range:
                     console.red('must provide a distance between 5m and {}m\n'.format(self.range))
                     return
-            # verify altitude is between 4m and 120m, use current if not provided
+            # verify altitude is between 5m and 50m, use current if not provided
             if altitude is not None:
-                if altitude < 4 or altitude > 120:
-                    console.red('must provide a altitude between 5m and 120m\n')
+                if altitude < 5 or altitude > 50:
+                    console.red('must provide a altitude between 5m and 50m\n')
                     return
             else:
                 altitude = location.alt
