@@ -34,42 +34,41 @@ class console(object):
         puts(colored.red(text))
 
 
+def _parse(cls, line, regex, typ):
+    ''' base functionality for argument parsing via regex '''
+    value = None
+    try:
+        match = re.search(regex, line)
+        if match is not None:
+            value = typ(match.group(1))
+    except Exception:
+        pass
+    return value
+
 class arguments(object):
     ''' methods for parsing arguments from Cmd app console line args '''
 
     @classmethod
-    def _parse_abstract(cls, line, regex, typ):
-        ''' base functionality for argument parsing '''
-        value = None
-        try:
-            match = re.search(regex, line)
-            if match is not None:
-                value = typ(match.group(1))
-        except:
-            pass
-        return value
-
-    @classmethod
     def altitude(cls, line):
         ''' parse --alt argument to an int '''
-        return cls._parse_abstract(line, r'alt=(\d+)', int)
+        return _parse(line, r'alt=(\d+)', int)
 
     @classmethod
     def distance(cls, line):
         ''' parse --dist argument to an int '''
-        return cls._parse_abstract(line, r'dist=(\d+)', int)
+        return _parse(line, r'dist=(\d+)', int)
 
     @classmethod
     def heading(cls, line):
         ''' parse --head argument to an int '''
-        return cls._parse_abstract(line, r'head=(\d+)', int)
+        return _parse(line, r'head=(\d+)', int)
 
     @classmethod
     def position(cls, line):
         ''' parse --lat/--lng arguments to a tuple '''
         # parse lat/lng/alt as floats, int
-        latitude = cls._parse_abstract(line, r'lat=(-?\d+.\d+)', float)
-        longitude = cls._parse_abstract(line, r'lng=(-?\d+.\d+)', float)
+        latitude = _parse(line, r'lat=(-?\d+.\d+)', float)
+        longitude = _parse(line, r'lng=(-?\d+.\d+)', float)
         # only return lat/lng as a pair, otherwise both as None
         if latitude == None or longitude == None:
             latitude, longitude = None, None
