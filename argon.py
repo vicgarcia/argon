@@ -7,8 +7,8 @@ import dronekit
 import dronekit_sitl
 import clint import textui
 from pymavlink import mavutil
-from LatLon import LatLon
-from clint.textui import puts, colored
+from geopy.point import Point
+from geopy.distance import geodesic, GeodesicDistance
 
 
 class console(object):
@@ -301,7 +301,7 @@ class App(cmd.Cmd):
             self.vehicle.simple_goto(self.vehicle.location.global_relative_frame)
             # save position for use w/ the home command
             home = self.vehicle.location.global_relative_frame
-            self.home = LatLon(home.lat, home.lon)
+            self.home = Point(latitude=home.lat, longitude=home.lon)
         else:
             console.white('... an error occured while arming the vehicle')
         console.blank()
@@ -355,6 +355,9 @@ class App(cmd.Cmd):
             return
         else:
             # verify latitude/longitude provided is within 300m of current
+            current = Point(latitude=location.lat, longitude=location.lon)
+            new = Point(latitude=latitude, longitude=longitude)
+            if geodesic(current, new).meters > self.range:
                 console.red('new position is outside control range of {}m\n'.format(self.range))
                 return
         # parse & verify target altitude, use current if not provided
@@ -374,13 +377,12 @@ class App(cmd.Cmd):
         console.white('... position update command issued\n')
 
     def _calculate_point_by_offset(self, position, heading, distance):
-        ''' find offset from position (LatLon) by heading/distance (ints)
+        ''' find offset from position (Point) by heading/distance (ints)
             --heading=X is degrees 1-360, --distance=X is meters
             returns lat, lng as floats in a tuple
         '''
-        distance_as_km = float(distance) / 1000
-        lat, lng = position.offset(heading, distance_as_km).to_string('D')
-        return (float(lat), float(lng))
+        dis = GeodesicDistance(meters=distance)
+        return dis.destination(point=position, bearing=heading)
 
     def do_move(self, args):
         ''' move to position via --head/--dist and/or --alt '''
@@ -423,10 +425,10 @@ class App(cmd.Cmd):
         console.white('update vehicle position')
         if heading and distance:
             console.white('... calculate new position from parameters')
-            current = LatLon(location.lat, location.lon)
-            latitude, longitude = self._calculate_point_by_offset(current, heading, distance)
+            current = Point(latitude=location.lat, longitude=location.lon)
+            new = self._calculate_point_by_offset(current, heading, distance)
         else:
-            latitude, longitude = (location.lat, location.lon)
+            new = Point(latitude=location.lat, longitude=location.lon)
         # issue move command
         self.vehicle.simple_goto(
             dronekit.LocationGlobalRelative(latitude, longitude, altitude),
