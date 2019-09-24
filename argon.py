@@ -5,6 +5,7 @@ import re
 import time
 import dronekit
 import dronekit_sitl
+import clint import textui
 from pymavlink import mavutil
 from LatLon import LatLon
 from clint.textui import puts, colored
@@ -21,17 +22,17 @@ class console(object):
     @classmethod
     def blank(cls):
         ''' output a blank line to the console '''
-        puts(newline=True)
+        textui.puts(newline=True)
 
     @classmethod
     def white(cls, text):
         ''' output white text to the console '''
-        puts(text)
+        textui.puts(text)
 
     @classmethod
     def red(cls, text):
         ''' output red text to the console '''
-        puts(colored.red(text))
+        textui.puts(textui.colored.red(text))
 
 
 def _parse(cls, line, regex, typ):
