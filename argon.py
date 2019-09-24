@@ -295,8 +295,8 @@ class App(cmd.Cmd):
                 if self.vehicle.location.global_relative_frame.alt >= (altitude * .90):
                     break
             console.white('... launch successful, hovering at {}m'.format(
-                    str(self.vehicle.location.global_relative_frame.alt)
-                ))
+                str(self.vehicle.location.global_relative_frame.alt)
+            ))
             # issue dummy move command to allow yaw control
             self.vehicle.simple_goto(self.vehicle.location.global_relative_frame)
             # save position for use w/ the home command
@@ -368,9 +368,9 @@ class App(cmd.Cmd):
         # issue move command
         console.white('update vehicle position')
         self.vehicle.simple_goto(
-                dronekit.LocationGlobalRelative(latitude, longitude, altitude),
-                groundspeed=self.speed
-            )
+            dronekit.LocationGlobalRelative(latitude, longitude, altitude),
+            groundspeed=self.speed
+        )
         console.white('... position update command issued\n')
 
     def _calculate_point_by_offset(self, position, heading, distance):
@@ -429,10 +429,10 @@ class App(cmd.Cmd):
             latitude, longitude = (location.lat, location.lon)
         # issue move command
         self.vehicle.simple_goto(
-                dronekit.LocationGlobalRelative(latitude, longitude, altitude),
-                groundspeed=self.speed
-            )
-        console.white('... position update command issued \n')
+            dronekit.LocationGlobalRelative(latitude, longitude, altitude),
+            groundspeed=self.speed
+        )
+        console.white('... position update command issued\n')
 
     def do_yaw(self, args):
         ''' lock yaw at --head=X or --unlock '''
