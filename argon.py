@@ -135,9 +135,9 @@ class App(cmd.Cmd):
         cmd.Cmd.__init__(self)
         console.clear()
         console.white("# argon : flight control console\n")
-        console.white("connecting to drone")
+        console.white("connecting to drone\n")
         try:
-            console.white("... waiting on connection")
+            console.white("... waiting on connection\n")
             self.vehicle = dronekit.connect(connection_string,
                 vehicle_class=IRIS,
                 status_printer=self._status_printer,
