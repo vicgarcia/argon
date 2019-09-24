@@ -35,7 +35,7 @@ class console(object):
         textui.puts(textui.colored.red(text))
 
 
-def _parse(cls, line, regex, typ):
+def _parse(line, regex, typ):
     ''' base functionality for argument parsing via regex '''
     value = None
     try:
