@@ -130,29 +130,21 @@ class App(cmd.Cmd):
             console.blank()  # handle a ctrl-C by moving to new/blank console line
             self.cmdloop()
 
-    def __init__(self, test=False):
+    def __init__(self, connection_string):
         cmd.Cmd.__init__(self)
         console.clear()
         console.white("# argon : dronekit-based flight control console \n")
         console.white("connecting to drone")
         try:
             console.white("... waiting on connection")
-            if test == True:
-                self.vehicle = dronekit.connect('tcp:127.0.0.1:5760',
-                        vehicle_class=IRIS,
-                        status_printer=self._status_printer,
-                        wait_ready=True,
-                        heartbeat_timeout=30,   # 30 second timeout
-                    )
-            else:
-                self.vehicle = dronekit.connect('/dev/cu.usbserial-DJ00DSDS',
-                        baud=57600,
-                        vehicle_class=IRIS,
-                        status_printer=self._status_printer,
-                        wait_ready=True,
-                        heartbeat_timeout=30,   # 30 second timeout
-                    )
-            console.white("... connected \n")
+            self.vehicle = dronekit.connect(connection_string,
+                vehicle_class=IRIS,
+                status_printer=self._status_printer,
+                wait_ready=True,
+                heartbeat_timeout=30,   # 30 second timeout
+                baud=57600,             # works w/ usb radio
+            )
+            console.white("... connected\n")
         except KeyboardInterrupt:
             console.white("... canceling connection attempt \n")
             return True
@@ -477,18 +469,18 @@ class App(cmd.Cmd):
 
 if __name__ == '__main__':
 
-    # check for the --test flag from the command line
-    test = True if '--test' in ' '.join(sys.argv) else False
+    connection_string = '/dev/cu.usbserial-DJ00DSDS'
 
-    # if running in test mode, start the simulator
+    # check for the --test flag from the command line, if present start the simulator
+    test = True if '--test' in sys.argv else False
     if test:
         sitl = dronekit_sitl.start_default(lat=41.9751961, lon=-87.6636616)
+        connection_string = sitl.connection_string()
 
     # enter the console application
-    app = App(test=test)
+    app = App(connection_string)
     app.cmdloop()
 
     # if running in test mode, end the simulator
     if test:
         sitl.stop()
-
