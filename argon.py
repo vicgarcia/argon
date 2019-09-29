@@ -431,7 +431,7 @@ class App(cmd.Cmd):
             new = Point(latitude=location.lat, longitude=location.lon)
         # issue move command
         self.vehicle.simple_goto(
-            dronekit.LocationGlobalRelative(latitude, longitude, altitude),
+            dronekit.LocationGlobalRelative(new.latitude, new.longitude, altitude),
             groundspeed=self.speed
         )
         console.white('... position update command issued\n')
