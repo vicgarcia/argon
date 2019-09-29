@@ -46,6 +46,7 @@ def _parse(line, regex, typ):
         pass
     return value
 
+
 class arguments(object):
     ''' methods for parsing arguments from Cmd app console line args '''
 
@@ -77,9 +78,7 @@ class arguments(object):
 
 
 class IRIS(dronekit.Vehicle):
-    ''' extend the base dronekit vehicle to provide
-        better yaw and camera trigger control methods
-    '''
+    ''' extend Vehicle class to customize functionality for IRIS+ w/ camera '''
 
     def lock_yaw(self, heading, direction='clock', absolute=True):
         ''' lock vehicle yaw at a specific vehicle heading '''
@@ -117,6 +116,11 @@ class IRIS(dronekit.Vehicle):
         self.channels.overrides = {}
 
 
+def _status_printer(txt):
+    ''' used when connecting to a Vehicle '''
+    return
+
+
 class App(cmd.Cmd):
     ''' console application to control drone '''
 
@@ -142,9 +146,6 @@ class App(cmd.Cmd):
 
     def emptyline(self):
         console.blank()
-
-    def _status_printer(self, txt):
-        return
 
     def _wait(self, delay=3):
         time.sleep(delay)
@@ -241,15 +242,17 @@ class App(cmd.Cmd):
     def do_launch(self, args):
         ''' arm and launch drone, loiter at provided altitude parameter (meters) '''
         if self.vehicle.system_status.state == 'ACTIVE':
-            console.red("vehicle is already ACTIVE\n")
+            console.red("vehicle is already ACTIVE")
+            console.blank()
             return
         if not self.vehicle.is_armable:
             if self.vehicle.battery.voltage < 11.0:
-                console.red("vehicle cannot be ARMED with low battery\n")
+                console.red("vehicle cannot be ARMED with low battery")
             elif self.vehicle.gps_0.fix_type != 3:
-                console.red("vehicle cannot be ARMED without GPS fix\n")
+                console.red("vehicle cannot be ARMED without GPS fix")
             else:
-                console.red("vehicle cannot be ARMED\n")
+                console.red("vehicle cannot be ARMED")
+            console.blank()
             return
         # arm and launch the vehicle
         console.white('begin launch sequence')
@@ -462,25 +465,28 @@ if __name__ == '__main__':
 
     # connect to the vehicle, error handling the connection
     try:
-        console.white("connecting to drone")
+        console.white("Connecting to vehicle.")
         vehicle = dronekit.connect(connection_string,
             vehicle_class=IRIS,
-            status_printer=self._status_printer,
+            status_printer=_status_printer,     # defined above w/ custom vehicle
             wait_ready=True,
-            heartbeat_timeout=30,   # 30 second timeout
-            baud=57600,             # works w/ usb radio
+            heartbeat_timeout=30,               # 30 second timeout
+            baud=57600,                         # works w/ usb radio
         )
+    # catch exception for CTRL-D cancel during connection
     except KeyboardInterrupt:
-        console.white("... canceling connection attempt\n")
+        console.white("Canceling connection attempt!")
         vehicle = None
+    # catch other exceptions that occur during connection
     except Exception:
-        console.white("... unable to connect\n")
+        console.white("Unable to connect!")
         vehicle = None
 
-    # enter the console application only when connected to a vehicle
+    # enter the console application, only when connected to a vehicle
     if vehicle:
         app = App(vehicle)
         app.cmdloop()
+
         # after execution of console app exits, close vehicle connection
         vehicle.close()
 
