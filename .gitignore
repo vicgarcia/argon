@@ -1,9 +1,6 @@
 # vscode configuration
 .vscode/*
 
-# virtualenv path
-venv/*
-
 # .pyc files
 *.pyc
 
@@ -12,3 +9,6 @@ venv/*
 
 # junk files
 .DS_Store
+
+# environment variables
+.env

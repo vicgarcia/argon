@@ -451,7 +451,8 @@ class App(cmd.Cmd):
 
 if __name__ == '__main__':
 
-    connection_string = '/dev/cu.usbserial-DJ00DSDS'
+    # get the connection string from .env file
+    connection_string = os.environ.get('VEHICLE_CONNECTION_STRING')
 
     # when test mode enabled, start the simulator and get the connection string to it
     test = True if '--test' in sys.argv else False
