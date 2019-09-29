@@ -131,27 +131,11 @@ class App(cmd.Cmd):
             console.blank()  # handle a ctrl-C by moving to new/blank console line
             self.cmdloop()
 
-    def __init__(self, connection_string):
+    def __init__(self, vehicle):
         cmd.Cmd.__init__(self)
         console.clear()
         console.white("# argon : flight control console\n")
-        console.white("connecting to drone\n")
-        try:
-            console.white("... waiting on connection\n")
-            self.vehicle = dronekit.connect(connection_string,
-                vehicle_class=IRIS,
-                status_printer=self._status_printer,
-                wait_ready=True,
-                heartbeat_timeout=30,   # 30 second timeout
-                baud=57600,             # works w/ usb radio
-            )
-            console.white("... connected\n")
-        except KeyboardInterrupt:
-            console.white("... canceling connection attempt\n")
-            return True
-        except Exception:
-            console.white("... unable to connect\n")
-            return True
+        self.vehicle = vehicle
 
     def default(self, args):
         console.red("unknown command, try 'help' for available commands\n")
@@ -178,10 +162,8 @@ class App(cmd.Cmd):
         console.blank()
 
     def do_exit(self, args):
-        ''' close connection to vehicle and exit console environment '''
-        console.white("closing connection\n")
-        if self.vehicle:
-            self.vehicle.close()
+        ''' exit console environment '''
+        console.white("exiting application\n")
         return True
 
     def do_help(self, args):
@@ -471,15 +453,35 @@ if __name__ == '__main__':
 
     connection_string = '/dev/cu.usbserial-DJ00DSDS'
 
-    # check for the --test flag from the command line, if present start the simulator
+    # when test mode enabled, start the simulator and get the connection string to it
     test = True if '--test' in sys.argv else False
     if test:
         sitl = dronekit_sitl.start_default(lat=41.9751961, lon=-87.6636616)
         connection_string = sitl.connection_string()
 
-    # enter the console application
-    app = App(connection_string)
-    app.cmdloop()
+    # connect to the vehicle, error handling the connection
+    try:
+        console.white("connecting to drone")
+        vehicle = dronekit.connect(connection_string,
+            vehicle_class=IRIS,
+            status_printer=self._status_printer,
+            wait_ready=True,
+            heartbeat_timeout=30,   # 30 second timeout
+            baud=57600,             # works w/ usb radio
+        )
+    except KeyboardInterrupt:
+        console.white("... canceling connection attempt\n")
+        vehicle = None
+    except Exception:
+        console.white("... unable to connect\n")
+        vehicle = None
+
+    # enter the console application only when connected to a vehicle
+    if vehicle:
+        app = App(vehicle)
+        app.cmdloop()
+        # after execution of console app exits, close vehicle connection
+        vehicle.close()
 
     # if running in test mode, end the simulator
     if test:
