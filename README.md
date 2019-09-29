@@ -114,3 +114,5 @@ exiting application
 ```
 
 ![drone photography](https://github.com/vicgarcia/argon/raw/dev/images/kitescape.jpg)
+
+This is an example of images captured using this application with my drone.  This image was created from three individual photos taken by moving the drone to each point and capturing the photo using this app.  The full size image is also included in this repository in the 'images' folder.
