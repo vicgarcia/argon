@@ -1,4 +1,4 @@
-![pixhawk flight controller](https://github.com/vicgarcia/argon/raw/dev/images/pixhawk.jpg)
+![pixhawk flight controller](https://github.com/vicgarcia/argon/raw/dev/.images/pixhawk.jpg)
 
 Argon is a console application to control a [3D Robotics](https://3dr.com/) [IRIS+ quadrotor drone](https://3dr.com/support/articles/iris/).
 
@@ -113,6 +113,6 @@ mode: RTL
 exiting application
 ```
 
-![drone photography](https://github.com/vicgarcia/argon/raw/dev/images/kitescape.jpg)
+![drone photography](https://github.com/vicgarcia/argon/raw/dev/.images/kitescape.jpg)
 
-This is an example of images captured using this application with my drone.  This image was created from three individual photos taken by moving the drone to each point and capturing the photo using this app.  The full size image is also included in this repository in the 'images' folder.
+This is an example of images captured using this application with my drone.  This image was created from three individual photos taken by moving the drone to each point and capturing the photo using this app.  The full size image is also included in this repository in the '.images' folder.
