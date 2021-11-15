@@ -1,14 +1,6 @@
-# vscode configuration
-.vscode/*
-
-# .pyc files
+.vscode
 *.pyc
-
-# log files
 *.log
-
-# junk files
 .DS_Store
-
-# environment variables
 .env
+venv
