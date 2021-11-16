@@ -55,8 +55,7 @@ class Argon(cmd.Cmd):
 
     def do_help(self, args):
         ''' print help text, all commands with options/details '''
-        with open('help.txt', 'r') as help:
-            console.white(help.read())
+        console.white(console.HELP_TEXT)
 
     # vehicle state
 
