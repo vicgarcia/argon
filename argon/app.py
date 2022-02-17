@@ -71,14 +71,12 @@ class Argon(cmd.Cmd):
     def do_telemetry(self, args):
         ''' print the telemetry data from vehicle to the console '''
         location = self.vehicle.location.global_relative_frame
-        console.white("position: {}, {}".format(location.lat, location.lon))
-        console.white("altitude: {}m".format(location.alt))
-        console.white("heading: {}".format(360 if self.vehicle.heading == 0 else self.vehicle.heading))
-        console.white("airspeed: {}".format(self.vehicle.airspeed))
-        console.white("battery: {} / {:.3}".format(
-                self.vehicle.battery.voltage,
-                self.vehicle.parameters['FS_BATT_VOLTAGE']
-            ))
+        vehicle = self.vehicle
+        console.white(f"position: {location.lat}, {location.lon}")
+        console.white(f"altitude: {location.alt}m")
+        console.white(f"heading: {vehicle.heading}")
+        console.white(f"airspeed: {vehicle.airspeed}")
+        console.white(f"battery: {vehicle.current_battery} / {vehicle.total_battery}")
         console.blank()
 
     def do_mode(self, arg):
