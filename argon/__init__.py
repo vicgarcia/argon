@@ -18,6 +18,11 @@ def run():
         sitl = dronekit_sitl.start_default(lat=41.9751961, lon=-87.6636616)
         connection_string = sitl.connection_string()
 
+    # exit if there is no connection string
+    if not connection_string:
+        console.white("No VEHICLE_CONNECTION_STRING found.")
+        sys.exit(1)
+
     # connect to the vehicle, error handling the connection
     try:
         console.white("Connecting to vehicle.")
