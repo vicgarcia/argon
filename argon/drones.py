@@ -3,7 +3,18 @@ import dronekit
 from pymavlink import mavutil
 
 
-class IRIS(dronekit.Vehicle):
+class BaseVehicle(dronekit.Vehicle):
+
+    @property
+    def current_battery(self):
+        return self.battery.voltage
+
+    @property
+    def total_battery(self):
+        return round(self.parameters['FS_BATT_VOLTAGE'], 3)
+
+
+class IRIS(BaseVehicle):
     ''' extend Vehicle class to customize functionality for IRIS+ w/ camera '''
 
     def lock_yaw(self, heading, direction='clock', absolute=True):
