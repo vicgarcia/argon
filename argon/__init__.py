@@ -59,3 +59,5 @@ def run():
     # if running in test mode, end the simulator
     if test:
         sitl.stop()
+
+    sys.exit(0)
