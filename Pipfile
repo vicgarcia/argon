@@ -8,8 +8,9 @@ clint = "*"
 geopy = "*"
 dronekit = "*"
 dronekit-sitl = "*"
+pymavlink = "==2.4.8"
 
 [dev-packages]
 
 [requires]
-python_version = "3.6"
+python_version = "3.8"

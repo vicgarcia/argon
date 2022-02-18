@@ -1,138 +1,24 @@
 import cmd
-import os
-import sys
-import re
 import time
 import dronekit
-import dronekit_sitl
-from clint import textui
-from pymavlink import mavutil
 from geopy.point import Point
 from geopy.distance import geodesic, GeodesicDistance
+from . import console
+from . import arguments
 
 
-class console(object):
-    ''' methods for console output using clint components '''
-
-    @classmethod
-    def clear(cls):
-        ''' clear the console '''
-        os.system('clear')
-
-    @classmethod
-    def blank(cls):
-        ''' output a blank line to the console '''
-        textui.puts(newline=True)
-
-    @classmethod
-    def white(cls, text):
-        ''' output white text to the console '''
-        textui.puts(text)
-
-    @classmethod
-    def red(cls, text):
-        ''' output red text to the console '''
-        textui.puts(textui.colored.red(text))
-
-
-def _parse(line, regex, typ):
-    ''' base functionality for argument parsing via regex '''
-    value = None
-    try:
-        match = re.search(regex, line)
-        if match is not None:
-            value = typ(match.group(1))
-    except Exception:
-        pass
-    return value
-
-
-class arguments(object):
-    ''' methods for parsing arguments from Cmd app console line args '''
-
-    @classmethod
-    def altitude(cls, line):
-        ''' parse --alt argument to an int '''
-        return _parse(line, r'alt=(\d+)', int)
-
-    @classmethod
-    def distance(cls, line):
-        ''' parse --dist argument to an int '''
-        return _parse(line, r'dist=(\d+)', int)
-
-    @classmethod
-    def heading(cls, line):
-        ''' parse --head argument to an int '''
-        return _parse(line, r'head=(\d+)', int)
-
-    @classmethod
-    def position(cls, line):
-        ''' parse --lat/--lng arguments to a tuple '''
-        # parse lat/lng/alt as floats, int
-        latitude = _parse(line, r'lat=(-?\d+.\d+)', float)
-        longitude = _parse(line, r'lng=(-?\d+.\d+)', float)
-        # only return lat/lng as a pair, otherwise both as None
-        if latitude == None or longitude == None:
-            latitude, longitude = None, None
-        return latitude, longitude
-
-
-class IRIS(dronekit.Vehicle):
-    ''' extend Vehicle class to customize functionality for IRIS+ w/ camera '''
-
-    def lock_yaw(self, heading, direction='clock', absolute=True):
-        ''' lock vehicle yaw at a specific vehicle heading '''
-        msg = self.message_factory.command_long_encode(
-            0, 0,                                   # system, component
-            mavutil.mavlink.MAV_CMD_CONDITION_YAW,  # command
-            0,                                      # confirmation
-            heading,                                # yaw in degrees
-            0,                                      # speed as deg/sec
-            1 if direction == 'clock' else -1,      # -1 is CCW, 1 is CW
-            0 if absolute is True else 1,           # 1 is rel, 0 is abs
-            0, 0, 0                                 # unused parameters
-        )
-        self.send_mavlink(msg)
-
-    def unlock_yaw(self):
-        ''' reset yaw to follow direction of vehicle travel '''
-        msg = self.message_factory.command_long_encode(
-            0, 0,                                   # target system, component
-            mavutil.mavlink.MAV_CMD_DO_SET_ROI,     # command
-            0,                                      # confirmation
-            0, 0, 0, 0, 0, 0, 0                     # all params empty to reset
-        )
-        self.send_mavlink(msg)
-
-    def trigger_camera(self):
-        ''' trigger camera via usb cable via signal override on ch 7
-            the handheld radio controller must be on for this to work
-        '''
-        # override on channel 7 to send signal to trigger camera
-        self.channels.overrides[7] = 2000
-        # send signal for 1 second
-        time.sleep(1)
-        # clear override
-        self.channels.overrides = {}
-
-
-def _status_printer(txt):
-    ''' used when connecting to a Vehicle '''
-    return
-
-
-class App(cmd.Cmd):
+class Argon(cmd.Cmd):
     ''' console application to control drone '''
 
     prompt = '# '               # console prompt character prefix
-    speed = 4.0                 # vehicle speed as a float
+    speed = 3.0                 # vehicle speed as a float
     range = 300                 # max movement distance
 
     def cmdloop(self):
         try:
             cmd.Cmd.cmdloop(self)
         except KeyboardInterrupt:
-            console.blank()  # handle a ctrl-C by moving to new/blank console line
+            console.blank()     # handle a ctrl-C by moving to new/blank console line
             self.cmdloop()
 
     def __init__(self, vehicle):
@@ -169,8 +55,7 @@ class App(cmd.Cmd):
 
     def do_help(self, args):
         ''' print help text, all commands with options/details '''
-        with open('help.txt', 'r') as help:
-            console.white(help.read())
+        console.white(console.HELP_TEXT)
 
     # vehicle state
 
@@ -186,14 +71,12 @@ class App(cmd.Cmd):
     def do_telemetry(self, args):
         ''' print the telemetry data from vehicle to the console '''
         location = self.vehicle.location.global_relative_frame
-        console.white("position: {}, {}".format(location.lat, location.lon))
-        console.white("altitude: {}m".format(location.alt))
-        console.white("heading: {}".format(360 if self.vehicle.heading == 0 else self.vehicle.heading))
-        console.white("airspeed: {}".format(self.vehicle.airspeed))
-        console.white("battery: {} / {:.3}".format(
-                self.vehicle.battery.voltage,
-                self.vehicle.parameters['FS_BATT_VOLTAGE']
-            ))
+        vehicle = self.vehicle
+        console.white(f"position: {location.lat}, {location.lon}")
+        console.white(f"altitude: {location.alt}m")
+        console.white(f"heading: {vehicle.heading}")
+        console.white(f"airspeed: {vehicle.airspeed}")
+        console.white(f"battery: {vehicle.current_battery} / {vehicle.total_battery}")
         console.blank()
 
     def do_mode(self, arg):
@@ -449,47 +332,3 @@ class App(cmd.Cmd):
         self.vehicle.trigger_camera()
         self._wait()    # wait 3 seconds for clean shot
         console.blank()
-
-
-
-if __name__ == '__main__':
-
-    # get the connection string from .env file
-    connection_string = os.environ.get('VEHICLE_CONNECTION_STRING')
-
-    # when test mode enabled, start the simulator and get the connection string to it
-    test = True if '--test' in sys.argv else False
-    if test:
-        sitl = dronekit_sitl.start_default(lat=41.9751961, lon=-87.6636616)
-        connection_string = sitl.connection_string()
-
-    # connect to the vehicle, error handling the connection
-    try:
-        console.white("Connecting to vehicle.")
-        vehicle = dronekit.connect(connection_string,
-            vehicle_class=IRIS,
-            status_printer=_status_printer,     # defined above w/ custom vehicle
-            wait_ready=True,
-            heartbeat_timeout=30,               # 30 second timeout
-            baud=57600,                         # works w/ usb radio
-        )
-    # catch exception for CTRL-D cancel during connection
-    except KeyboardInterrupt:
-        console.white("Canceling connection attempt!")
-        vehicle = None
-    # catch other exceptions that occur during connection
-    except Exception:
-        console.white("Unable to connect!")
-        vehicle = None
-
-    # enter the console application, only when connected to a vehicle
-    if vehicle:
-        app = App(vehicle)
-        app.cmdloop()
-
-        # after execution of console app exits, close vehicle connection
-        vehicle.close()
-
-    # if running in test mode, end the simulator
-    if test:
-        sitl.stop()

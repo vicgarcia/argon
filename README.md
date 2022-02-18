@@ -1,4 +1,4 @@
-![pixhawk flight controller](https://github.com/vicgarcia/argon/raw/dev/images/pixhawk.jpg)
+![pixhawk flight controller](https://github.com/vicgarcia/argon/raw/dev/.images/pixhawk.jpg)
 
 Argon is a console application to control a [3D Robotics](https://3dr.com/) [IRIS+ quadrotor drone](https://3dr.com/support/articles/iris/).
 
@@ -10,14 +10,18 @@ git clone git@github.com:vicgarcia/argon.git
 
 # setup virtual environment + install dependencies w/ pipenv
 cd argon
+pyenv local 3.8.12
+cp .env.example .env
+mkdir .venv
 pipenv install
+```
 
-# run argon in test mode, which uses the dronekit simulator
-pipenv run python argon.py --test
+Run Argon in test mode, which automatically starts/stop the SITL
+```
+pipenv run python run.py --test
 ```
 
 Once started in test mode, the flight console can be used with a simulated drone.
-
 ```
 # argon : flight control console
 
@@ -113,6 +117,6 @@ mode: RTL
 exiting application
 ```
 
-![drone photography](https://github.com/vicgarcia/argon/raw/dev/images/kitescape.jpg)
+![drone photography](https://github.com/vicgarcia/argon/raw/dev/.images/kitescape.jpg)
 
-This is an example of images captured using this application with my drone.  This image was created from three individual photos taken by moving the drone to each point and capturing the photo using this app.  The full size image is also included in this repository in the 'images' folder.
+This is an example of images captured using this application with my drone.  This image was created from three individual photos taken by moving the drone to each point and capturing the photo using this app.  The full size image is also included in this repository in the '.images' folder.
