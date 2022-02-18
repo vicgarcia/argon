@@ -42,19 +42,18 @@ def run():
     # catch exception for CTRL-D cancel during connection
     except KeyboardInterrupt:
         console.white("Canceling connection attempt!")
-        vehicle = None
+        sys.exit(1)
     # catch other exceptions that occur during connection
     except Exception:
         console.white("Unable to connect!")
-        vehicle = None
+        sys.exit(1)
 
     # enter the console application, only when connected to a vehicle
-    if vehicle:
-        app = Argon(vehicle)
-        app.cmdloop()
+    app = Argon(vehicle)
+    app.cmdloop()
 
-        # after execution of console app exits, close vehicle connection
-        vehicle.close()
+    # after execution of console app exits, close vehicle connection
+    vehicle.close()
 
     # if running in test mode, end the simulator
     if test:
