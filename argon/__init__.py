@@ -1,4 +1,5 @@
 import os
+import logging
 import sys
 import dronekit
 import dronekit_sitl
@@ -17,6 +18,11 @@ def run():
     if test:
         sitl = dronekit_sitl.start_default(lat=41.9751961, lon=-87.6636616)
         connection_string = sitl.connection_string()
+        # silence noisy output, we generally are unconcerned
+        autopilot_logger = logging.getLogger('autopilot')
+        autopilot_logger.disabled = True
+        dronekit_logger = logging.getLogger('dronekit')
+        dronekit_logger.disabled = True
 
     # exit if there is no connection string
     if not connection_string:
