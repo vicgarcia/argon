@@ -10,14 +10,18 @@ git clone git@github.com:vicgarcia/argon.git
 
 # setup virtual environment + install dependencies w/ pipenv
 cd argon
+pyenv local 3.8.12
+cp .env.example .env
+mkdir .venv
 pipenv install
+```
 
-# run argon in test mode, which uses the dronekit simulator
-pipenv run python argon.py --test
+Run Argon in test mode, which automatically starts/stop the SITL
+```
+pipenv run python run.py --test
 ```
 
 Once started in test mode, the flight console can be used with a simulated drone.
-
 ```
 # argon : flight control console
 
