@@ -9,6 +9,8 @@ geopy = "*"
 dronekit = "*"
 dronekit-sitl = "*"
 pymavlink = "==2.4.8"
+serial = "*"
+pyserial = "*"
 
 [dev-packages]
 
