@@ -12,6 +12,7 @@ def run():
 
     # get the connection string from .env file
     connection_string = os.environ.get('VEHICLE_CONNECTION_STRING')
+    print(connection_string)
 
     # when test mode enabled, start the simulator and get the connection string to it
     test = True if '--test' in sys.argv else False
@@ -34,9 +35,10 @@ def run():
         console.white("Connecting to vehicle.")
         vehicle = dronekit.connect(connection_string,
             vehicle_class=drones.IRIS,
-            status_printer=lambda txt: None,        # defined above w/ custom vehicle
+            #status_printer=lambda txt: None,        # defined above w/ custom vehicle
             wait_ready=True,
-            heartbeat_timeout=30,                   # 30 second timeout
+            #heartbeat_timeout=180,                   # 180 second timeout (https://stackoverflow.com/questions/46210013/dronekit-python-vehicle-connection-timeout)
+            timeout=180,
             baud=57600,                             # works w/ usb radio
         )
     # catch exception for CTRL-D cancel during connection
@@ -44,7 +46,8 @@ def run():
         console.white("Canceling connection attempt!")
         sys.exit(1)
     # catch other exceptions that occur during connection
-    except Exception:
+    except Exception as e:
+        print(e)
         console.white("Unable to connect!")
         sys.exit(1)
 
